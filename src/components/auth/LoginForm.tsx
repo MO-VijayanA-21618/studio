@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ta } from '@/lib/constants/ta';
 import { Logo } from '../icons/Logo';
+import { signIn } from '@/lib/firebase/auth';
 
 const formSchema = z.object({
   email: z.string().email('தவறான மின்னஞ்சல்'),
@@ -41,20 +42,23 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    // In a real app, you would call Firebase auth here.
-    // For this demo, we'll simulate a successful login.
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Example: signInWithEmailAndPassword(auth, values.email, values.password)
-    // .then(...)
-
-    toast({
+    try {
+      await signIn(values.email, values.password);
+      toast({
         title: "வெற்றிகரமாக உள்நுழைந்துள்ளீர்கள்",
         description: ta.login.welcome,
       });
-
-    router.push('/dashboard');
-    setIsSubmitting(false);
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: "உள்நுழைவு தோல்வி",
+        description: error.message || "தவறான மின்னஞ்சல் அல்லது கடவுச்சொல்",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (

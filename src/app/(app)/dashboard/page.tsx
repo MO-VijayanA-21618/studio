@@ -3,7 +3,7 @@ import { RecentLoansTable } from '@/components/dashboard/RecentLoansTable';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ta } from '@/lib/constants/ta';
-import { CircleDollarSign, Landmark, PlusCircle, RefreshCw } from 'lucide-react';
+import { IndianRupee, Landmark, PlusCircle, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardPage() {
@@ -14,7 +14,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard title={ta.dashboard.totalLoans} value="1,250" icon={<CircleDollarSign />} />
+        <StatCard title={ta.dashboard.totalLoans} value="1,250" icon={<IndianRupee />} />
         <StatCard title={ta.dashboard.renewalsPending} value="82" icon={<RefreshCw />} />
         <StatCard title={ta.dashboard.auctionAlerts} value="15" icon={<Landmark />} />
       </div>
@@ -42,7 +42,7 @@ export default function DashboardPage() {
                     </Link>
                     <Link href="/loans" passHref>
                         <Button variant="secondary" className="w-full justify-start" size="lg">
-                            <CircleDollarSign className="mr-2 h-4 w-4" />
+                            <IndianRupee className="mr-2 h-4 w-4" />
                             {ta.dashboard.viewAllLoans}
                         </Button>
                     </Link>

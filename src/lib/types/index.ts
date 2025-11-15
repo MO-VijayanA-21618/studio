@@ -13,6 +13,7 @@ export const LoanItemSchema = z.object({
   name: z.string().min(2, "Item name is required"),
   weight: z.number().positive("Weight must be positive"),
   purity: z.enum(['24', '22', '18', '14']),
+  photo: z.string().nullable().optional(),
 });
 export type LoanItem = z.infer<typeof LoanItemSchema>;
 

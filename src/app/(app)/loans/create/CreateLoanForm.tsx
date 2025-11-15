@@ -11,16 +11,19 @@ import { Button } from '@/components/ui/button';
 import { CustomerDetailsStep } from './_components/CustomerDetailsStep';
 import { GoldItemsStep } from './_components/GoldItemsStep';
 import { CalculationStep } from './_components/CalculationStep';
+import { PhotoCaptureStep } from './_components/PhotoCaptureStep';
 import { LoanItemSchema, CustomerSchema } from '@/lib/types';
 import { ta } from '@/lib/constants/ta';
 import { useToast } from '@/hooks/use-toast';
 import { LoanPreviewModal } from './_components/LoanPreviewModal';
+import { createCustomer, createLoan } from '@/lib/firebase/firestore';
 
 const CreateLoanFormSchema = z.object({
   customer: CustomerSchema,
   loanItems: z.array(LoanItemSchema).min(1, "Please add at least one gold item."),
   goldRate: z.number({ required_error: "Gold rate is required"}).positive("Gold rate must be positive."),
   loanAmount: z.number().positive(),
+  customerPhoto: z.string().nullable().optional(),
 });
 
 type CreateLoanFormData = z.infer<typeof CreateLoanFormSchema>;
@@ -28,6 +31,7 @@ type CreateLoanFormData = z.infer<typeof CreateLoanFormSchema>;
 const steps = [
   { id: 'customer', title: ta.createLoan.customerDetails },
   { id: 'items', title: ta.createLoan.goldItems },
+  { id: 'photos', title: 'Photos' },
   { id: 'calculate', title: ta.createLoan.calculation },
 ];
 
@@ -43,9 +47,10 @@ export function CreateLoanForm() {
     mode: 'onChange',
     defaultValues: {
       customer: { name: '', phone: '', address: '' },
-      loanItems: [{ name: '', weight: 0, purity: '22' }],
+      loanItems: [{ name: '', weight: 0, purity: '22', photo: null }],
       goldRate: 0,
       loanAmount: 0,
+      customerPhoto: null,
     },
   });
 
@@ -55,7 +60,8 @@ export function CreateLoanForm() {
     let isValid = false;
     if (currentStep === 0) isValid = await trigger('customer');
     if (currentStep === 1) isValid = await trigger('loanItems');
-    if (currentStep === 2) isValid = await trigger(['goldRate', 'loanAmount']);
+    if (currentStep === 2) isValid = true; // Photos are optional
+    if (currentStep === 3) isValid = await trigger(['goldRate', 'loanAmount']);
 
     if (isValid) {
       if (currentStep < steps.length - 1) {
@@ -72,17 +78,46 @@ export function CreateLoanForm() {
 
   const onSubmit = async (data: CreateLoanFormData) => {
     setIsSubmitting(true);
-    // Simulate API call to save to Firestore
-    console.log("Form Data Submitted:", data);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-
-    toast({
+    
+    try {
+      // Create customer first
+      const customerDoc = await createCustomer(data.customer);
+      
+      // Calculate totals
+      const totalWeight = data.loanItems.reduce((sum, item) => sum + item.weight, 0);
+      const estimatedValue = totalWeight * data.goldRate;
+      
+      // Create loan
+      const loanData = {
+        customerId: customerDoc.id,
+        customerName: data.customer.name,
+        loanItems: data.loanItems,
+        goldRate: data.goldRate,
+        totalWeight,
+        estimatedValue,
+        loanAmount: data.loanAmount,
+        loanDate: new Date(),
+        status: 'Active' as const,
+        customerPhoto: data.customerPhoto
+      };
+      
+      await createLoan(loanData);
+      
+      toast({
         title: "கடன் வெற்றிகரமாக உருவாக்கப்பட்டது",
         description: `${data.customer.name} அவர்களின் கடன் பதியப்பட்டது.`
-    });
-
-    router.push('/dashboard');
+      });
+      
+      router.push('/dashboard');
+    } catch (error) {
+      toast({
+        title: "பிழை",
+        description: "கடன் உருவாக்குவதில் பிழை ஏற்பட்டது.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const watchedData = watch();
@@ -113,7 +148,8 @@ export function CreateLoanForm() {
             <form onSubmit={handleSubmit(onSubmit)}>
               {currentStep === 0 && <CustomerDetailsStep />}
               {currentStep === 1 && <GoldItemsStep />}
-              {currentStep === 2 && <CalculationStep onGeneratePreview={() => setIsPreviewOpen(true)} />}
+              {currentStep === 2 && <PhotoCaptureStep />}
+              {currentStep === 3 && <CalculationStep onGeneratePreview={() => setIsPreviewOpen(true)} />}
 
               <div className="mt-8 flex justify-between">
                 {currentStep > 0 ? (
@@ -127,9 +163,8 @@ export function CreateLoanForm() {
                     {ta.createLoan.next}
                   </Button>
                 ) : (
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isSubmitting ? ta.createLoan.submitting : ta.createLoan.submit}
+                  <Button type="button" onClick={() => setIsPreviewOpen(true)} disabled={isSubmitting}>
+                    Preview & Save Loan
                   </Button>
                 )}
               </div>
@@ -139,7 +174,11 @@ export function CreateLoanForm() {
       </div>
       <LoanPreviewModal 
         isOpen={isPreviewOpen} 
-        onClose={() => setIsPreviewOpen(false)} 
+        onClose={() => setIsPreviewOpen(false)}
+        onConfirm={() => {
+          setIsPreviewOpen(false);
+          handleSubmit(onSubmit)();
+        }}
         data={watchedData}
       />
     </FormProvider>
