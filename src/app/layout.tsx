@@ -4,7 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Nalandavar',
+  title: 'நாலண்டாவர் ஃபைனான்ஸ்',
   description: 'Gold Loan Management System',
 };
 

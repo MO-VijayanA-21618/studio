@@ -5,8 +5,8 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 200 50"
-      width="140"
-      height="40"
+      width="200"
+      height="50"
       {...props}
     >
       <defs>
@@ -28,13 +28,13 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
       <text
         x="45"
         y="35"
-        fontFamily="'Playfair Display', serif"
-        fontSize="30"
+        fontFamily="sans-serif"
+        fontSize="16"
         fontWeight="bold"
         fill="hsl(var(--foreground))"
         className="transition-colors"
       >
-        Nalandavar
+        நாலண்டாவர் ஃபைனான்ஸ்
       </text>
     </svg>
   );
