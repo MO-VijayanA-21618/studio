@@ -34,7 +34,7 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
         fill="hsl(var(--foreground))"
         className="transition-colors"
       >
-        SwarnaBandhu
+        Nalandavar
       </text>
     </svg>
   );

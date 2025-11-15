@@ -62,7 +62,7 @@ export function SidebarNav() {
       </SidebarContent>
       <SidebarFooter>
         <p className="text-xs text-muted-foreground p-2 group-data-[collapsible=icon]:hidden">
-          © 2024 SwarnaBandhu
+          © 2024 Nalandavar
         </p>
       </SidebarFooter>
     </>
