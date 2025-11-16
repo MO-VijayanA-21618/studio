@@ -3,7 +3,7 @@
     {
       "id": "login-illustration",
       "description": "An image of a Tamil deity for the login page.",
-      "imageUrl": "https://images.unsplash.com/photo-1629566270659-45031d26850b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0YW1pbCUyMGdvZHxlbnwwfHx8fDE3MTc2NTg5ODd8MA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1629566270659-45031d26850b?w=1080&auto=format&fit=crop&q=60",
       "imageHint": "tamil god"
     }
   ]
