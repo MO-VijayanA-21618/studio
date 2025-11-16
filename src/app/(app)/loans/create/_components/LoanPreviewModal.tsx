@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Dialog,
   DialogContent,
@@ -8,9 +9,14 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Download, Eye } from 'lucide-react';
+import { Eye, Loader2 } from 'lucide-react';
 import type { LoanItem, Customer } from '@/lib/types';
-import { generateReceiptPDF } from '@/lib/utils/receipt-generator';
+
+// Dynamically import the button to ensure jsPDF is only loaded on the client
+const ReceiptGeneratorButton = dynamic(() => import('./ReceiptGeneratorButton').then(mod => mod.ReceiptGeneratorButton), {
+  ssr: false,
+  loading: () => <Button variant="outline" disabled><Loader2 className="h-4 w-4 mr-1 animate-spin" />Loading PDF...</Button>
+});
 
 interface LoanPreviewModalProps {
   isOpen: boolean;
@@ -21,6 +27,7 @@ interface LoanPreviewModalProps {
     loanItems: LoanItem[];
     goldRate: number;
     loanAmount: number;
+    customerPhoto?: string | null;
   };
 }
 
@@ -56,25 +63,16 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
   
   const emiSchedule = generateEMISchedule();
   
-  const generateReceipt = async () => {
-    try {
-      const receiptData = {
-        customer: data.customer,
-        loanItems: data.loanItems,
-        goldRate: data.goldRate,
-        loanAmount: data.loanAmount,
-        totalWeight,
-        estimatedValue,
-        interestRate,
-        customerPhoto: data.customerPhoto,
-        emiSchedule
-      };
-      
-      await generateReceiptPDF(receiptData);
-    } catch (error) {
-      console.error('Error generating receipt:', error);
-      alert('Failed to generate receipt. Please try again.');
-    }
+  const receiptData = {
+    customer: data.customer,
+    loanItems: data.loanItems,
+    goldRate: data.goldRate,
+    loanAmount: data.loanAmount,
+    totalWeight,
+    estimatedValue,
+    interestRate,
+    customerPhoto: data.customerPhoto,
+    emiSchedule
   };
 
   return (
@@ -178,10 +176,7 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
             <Button variant="outline" onClick={onClose} className="flex-1">
               Cancel
             </Button>
-            <Button variant="outline" onClick={generateReceipt}>
-              <Download className="h-4 w-4 mr-1" />
-              Download PDF
-            </Button>
+            <ReceiptGeneratorButton data={receiptData} />
             <Button 
               onClick={async () => {
                 setIsConfirming(true);
