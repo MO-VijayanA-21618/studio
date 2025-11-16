@@ -21,7 +21,7 @@ const ReceiptGeneratorButton = dynamic(() => import('./ReceiptGeneratorButton').
 interface LoanPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
   data: {
     customer: Customer;
     loanItems: LoanItem[];
@@ -73,6 +73,16 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
     interestRate,
     customerPhoto: data.customerPhoto,
     emiSchedule
+  };
+
+  const handleConfirm = async () => {
+    setIsConfirming(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsConfirming(false);
+      onClose();
+    }
   };
 
   return (
@@ -178,18 +188,11 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
             </Button>
             <ReceiptGeneratorButton data={receiptData} />
             <Button 
-              onClick={async () => {
-                setIsConfirming(true);
-                try {
-                  await onConfirm();
-                } finally {
-                  setIsConfirming(false);
-                }
-              }} 
+              onClick={handleConfirm} 
               className="flex-1"
               disabled={isConfirming}
             >
-              {isConfirming ? 'Saving...' : 'Confirm & Save Loan'}
+              {isConfirming ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : 'Confirm & Save Loan'}
             </Button>
           </div>
         </div>
