@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Camera, Upload, X } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
+import { compressImage } from '@/lib/utils/image-compression';
 
 export function PhotoCaptureStep() {
   const { setValue, watch } = useFormContext();
@@ -51,8 +52,9 @@ export function PhotoCaptureStep() {
     const photoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
     
     if (captureType === 'customer') {
-      setCustomerPhoto(photoDataUrl);
-      setValue('customerPhoto', photoDataUrl);
+      const compressedPhoto = await compressImage(photoDataUrl, 100);
+      setCustomerPhoto(compressedPhoto);
+      setValue('customerPhoto', compressedPhoto);
     }
     
     stopCamera();
@@ -67,17 +69,17 @@ export function PhotoCaptureStep() {
     setCaptureType(null);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'customer') => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'customer') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setCustomerPhoto(result);
-      setValue('customerPhoto', result);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressedPhoto = await compressImage(file, 100);
+      setCustomerPhoto(compressedPhoto);
+      setValue('customerPhoto', compressedPhoto);
+    } catch (error) {
+      console.error('Error compressing image:', error);
+    }
   };
 
   const removePhoto = () => {

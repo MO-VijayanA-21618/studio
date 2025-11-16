@@ -26,6 +26,7 @@ interface LoanPreviewModalProps {
 
 export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPreviewModalProps) {
   const [showReceipt, setShowReceipt] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   
   const totalWeight = data.loanItems.reduce((sum, item) => sum + item.weight, 0);
   const estimatedValue = totalWeight * data.goldRate;
@@ -181,8 +182,19 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
               <Download className="h-4 w-4 mr-1" />
               Download PDF
             </Button>
-            <Button onClick={onConfirm} className="flex-1">
-              Confirm & Save Loan
+            <Button 
+              onClick={async () => {
+                setIsConfirming(true);
+                try {
+                  await onConfirm();
+                } finally {
+                  setIsConfirming(false);
+                }
+              }} 
+              className="flex-1"
+              disabled={isConfirming}
+            >
+              {isConfirming ? 'Saving...' : 'Confirm & Save Loan'}
             </Button>
           </div>
         </div>

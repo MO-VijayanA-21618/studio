@@ -77,11 +77,21 @@ export function CreateLoanForm() {
   };
 
   const onSubmit = async (data: CreateLoanFormData) => {
+    console.log('onSubmit called with data:', data);
     setIsSubmitting(true);
     
     try {
+      // Check if user is authenticated
+      const { auth } = await import('@/lib/firebase/client');
+      console.log('Auth user:', auth.currentUser);
+      if (!auth.currentUser) {
+        throw new Error('User not authenticated. Please login first.');
+      }
+      
       // Create customer first
+      console.log('Creating customer:', data.customer);
       const customerDoc = await createCustomer(data.customer);
+      console.log('Customer created:', customerDoc.id);
       
       // Calculate totals
       const totalWeight = data.loanItems.reduce((sum, item) => sum + item.weight, 0);
@@ -101,7 +111,9 @@ export function CreateLoanForm() {
         customerPhoto: data.customerPhoto
       };
       
-      await createLoan(loanData);
+      console.log('Creating loan:', loanData);
+      const loanDoc = await createLoan(loanData);
+      console.log('Loan created:', loanDoc.id);
       
       toast({
         title: "கடன் வெற்றிகரமாக உருவாக்கப்பட்டது",
@@ -110,9 +122,11 @@ export function CreateLoanForm() {
       
       router.push('/dashboard');
     } catch (error) {
+      console.error('Loan creation error:', error);
+      alert(`Error: ${error.message}`);
       toast({
         title: "பிழை",
-        description: "கடன் உருவாக்குவதில் பிழை ஏற்பட்டது.",
+        description: `கடன் உருவாக்குவதில் பிழை: ${error.message || 'Unknown error'}`,
         variant: "destructive"
       });
     } finally {
@@ -175,9 +189,16 @@ export function CreateLoanForm() {
       <LoanPreviewModal 
         isOpen={isPreviewOpen} 
         onClose={() => setIsPreviewOpen(false)}
-        onConfirm={() => {
-          setIsPreviewOpen(false);
-          handleSubmit(onSubmit)();
+        onConfirm={async () => {
+          console.log('Confirm clicked - starting submission');
+          try {
+            await handleSubmit(onSubmit)();
+            console.log('Submission completed successfully');
+          } catch (error) {
+            console.error('Submission failed:', error);
+          } finally {
+            setIsPreviewOpen(false);
+          }
         }}
         data={watchedData}
       />

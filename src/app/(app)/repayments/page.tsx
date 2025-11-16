@@ -4,15 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { ta } from "@/lib/constants/ta";
-import { getLoansByStatus, updateLoanStatus, createTransaction } from '@/lib/firebase/firestore';
+import { getLoans, getLoansByStatus, updateLoanStatus, createTransaction } from '@/lib/firebase/firestore';
 import { Loan } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { Search, Check } from 'lucide-react';
 
 export default function RepaymentsPage() {
   const [activeLoans, setActiveLoans] = useState<Loan[]>([]);
-  const [selectedLoan, setSelectedLoan] = useState<string>('');
+  const [filteredLoans, setFilteredLoans] = useState<Loan[]>([]);
+  const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [repaymentAmount, setRepaymentAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -20,13 +23,24 @@ export default function RepaymentsPage() {
   useEffect(() => {
     const fetchActiveLoans = async () => {
       try {
-        const snapshot = await getLoansByStatus('Active');
-        const loansData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          loanDate: doc.data().loanDate?.toDate() || new Date()
-        })) as Loan[];
-        setActiveLoans(loansData);
+        const snapshot = await getLoans(); // Get all loans instead of just Active
+        const loansData = snapshot.docs.map(doc => {
+          const data = doc.data();
+          console.log('Raw loan data:', data);
+          return {
+            id: doc.id,
+            ...data,
+            loanDate: data.loanDate?.toDate() || new Date()
+          };
+        }) as Loan[];
+        
+        console.log('Processed loans data:', loansData);
+        // Filter for repayable loans (Active and Renewed)
+        const repayableLoans = loansData.filter(loan => 
+          loan.status === 'Active' || loan.status === 'Renewed'
+        );
+        setActiveLoans(repayableLoans);
+        setFilteredLoans(repayableLoans);
       } catch (error) {
         console.error('Error fetching loans:', error);
       }
@@ -34,6 +48,28 @@ export default function RepaymentsPage() {
 
     fetchActiveLoans();
   }, []);
+
+  useEffect(() => {
+    console.log('Search term:', searchTerm);
+    console.log('Active loans:', activeLoans);
+    
+    if (!searchTerm) {
+      setFilteredLoans(activeLoans);
+    } else {
+      const filtered = activeLoans.filter(loan => {
+        const customerMatch = loan.customerName?.toLowerCase().includes(searchTerm.toLowerCase());
+        const loanIdMatch = loan.id?.toLowerCase().includes(searchTerm.toLowerCase());
+        const customerIdMatch = loan.customerId?.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        console.log(`Loan ${loan.id}: customer=${loan.customerName}, matches: ${customerMatch || loanIdMatch || customerIdMatch}`);
+        
+        return customerMatch || loanIdMatch || customerIdMatch;
+      });
+      
+      console.log('Filtered results:', filtered);
+      setFilteredLoans(filtered);
+    }
+  }, [activeLoans, searchTerm]);
 
   const handleRepayment = async () => {
     if (!selectedLoan || !repaymentAmount) {
@@ -47,27 +83,40 @@ export default function RepaymentsPage() {
 
     setLoading(true);
     try {
-      const loan = activeLoans.find(l => l.id === selectedLoan);
       const amount = parseFloat(repaymentAmount);
       
-      if (amount >= loan!.loanAmount) {
-        await updateLoanStatus(selectedLoan, 'Closed');
+      if (amount >= selectedLoan.loanAmount) {
+        await updateLoanStatus(selectedLoan.id!, 'Closed');
+        toast({
+          title: "Success",
+          description: "Full repayment - Loan closed successfully"
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Partial repayment recorded successfully"
+        });
       }
       
       await createTransaction({
-        loanId: selectedLoan,
+        loanId: selectedLoan.id!,
         type: 'repayment',
         amount,
         date: new Date()
       });
-
-      toast({
-        title: "Success",
-        description: "Repayment recorded successfully"
-      });
       
-      setSelectedLoan('');
+      setSelectedLoan(null);
       setRepaymentAmount('');
+      setSearchTerm('');
+      
+      // Refresh loans
+      const snapshot = await getLoans();
+      const loansData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        loanDate: doc.data().loanDate?.toDate() || new Date()
+      })) as Loan[];
+      setActiveLoans(loansData);
       
     } catch (error) {
       toast({
@@ -91,19 +140,54 @@ export default function RepaymentsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Select Loan</Label>
-              <Select value={selectedLoan} onValueChange={setSelectedLoan}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a loan" />
-                </SelectTrigger>
-                <SelectContent>
-                  {activeLoans.map((loan) => (
-                    <SelectItem key={loan.id} value={loan.id!}>
-                      {loan.customerName} - ₹{loan.loanAmount.toLocaleString()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Search & Select Loan</Label>
+              <div className="relative mt-2">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by customer name, loan no, customer ID..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+              
+              {selectedLoan && (
+                <div className="mt-2 p-3 border rounded-lg bg-green-50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium">{selectedLoan.customerName}</div>
+                      <div className="text-sm text-muted-foreground">
+                        ₹{selectedLoan.loanAmount.toLocaleString()} • {selectedLoan.loanDate.toLocaleDateString()}
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => setSelectedLoan(null)}>Change</Button>
+                  </div>
+                </div>
+              )}
+              
+              {searchTerm && !selectedLoan && (
+                <div className="mt-2 max-h-48 overflow-y-auto border rounded-lg">
+                  {filteredLoans.length === 0 ? (
+                    <div className="p-3 text-sm text-muted-foreground">No loans found</div>
+                  ) : (
+                    filteredLoans.map((loan) => (
+                      <div 
+                        key={loan.id}
+                        className="p-3 border-b last:border-b-0 hover:bg-gray-50 cursor-pointer"
+                        onClick={() => {
+                          setSelectedLoan(loan);
+                          setSearchTerm('');
+                        }}
+                      >
+                        <div className="font-medium">{loan.customerName}</div>
+                        <div className="text-sm text-muted-foreground">
+                          ₹{loan.loanAmount.toLocaleString()} • {loan.loanDate.toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
             
             <div>
@@ -128,23 +212,15 @@ export default function RepaymentsPage() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Active Loans ({activeLoans.length})</CardTitle>
+            <CardTitle>Repayment Instructions</CardTitle>
           </CardHeader>
           <CardContent>
-            {activeLoans.length === 0 ? (
-              <p>No active loans found.</p>
-            ) : (
-              <div className="space-y-2">
-                {activeLoans.map((loan) => (
-                  <div key={loan.id} className="p-3 border rounded">
-                    <div className="font-medium">{loan.customerName}</div>
-                    <div className="text-sm text-muted-foreground">
-                      Amount: ₹{loan.loanAmount.toLocaleString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="text-sm space-y-2">
+              <p>• Search and select a loan above</p>
+              <p>• Enter repayment amount</p>
+              <p>• Full repayment will close the loan</p>
+              <p>• Partial repayments are recorded as transactions</p>
+            </div>
           </CardContent>
         </Card>
       </div>

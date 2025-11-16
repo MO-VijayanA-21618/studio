@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2, Camera, Upload, X } from 'lucide-react';
 import { ta } from '@/lib/constants/ta';
 import { Card, CardContent } from '@/components/ui/card';
+import { compressImage } from '@/lib/utils/image-compression';
 
 export function GoldItemsStep() {
   const { control, setValue, watch } = useFormContext();
@@ -63,7 +64,8 @@ export function GoldItemsStep() {
     context?.drawImage(video, 0, 0);
     
     const photoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    setValue(`loanItems.${captureItemIndex}.photo`, photoDataUrl);
+    const compressedPhoto = await compressImage(photoDataUrl, 100);
+    setValue(`loanItems.${captureItemIndex}.photo`, compressedPhoto);
     
     stopCamera();
   };
@@ -77,16 +79,16 @@ export function GoldItemsStep() {
     setCaptureItemIndex(null);
   };
   
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, itemIndex: number) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, itemIndex: number) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setValue(`loanItems.${itemIndex}.photo`, result);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressedPhoto = await compressImage(file, 100);
+      setValue(`loanItems.${itemIndex}.photo`, compressedPhoto);
+    } catch (error) {
+      console.error('Error compressing image:', error);
+    }
   };
   
   const removeItemPhoto = (itemIndex: number) => {
