@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "login-illustration",
-      "description": "An illustration of gold jewelry for the login page.",
-      "imageUrl": "https://images.unsplash.com/photo-1650455221359-3aebf920bcc5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxnb2xkJTIwamV3ZWxyeXxlbnwwfHx8fDE3NjMzMDc4MjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "gold jewelry"
+      "description": "An illustration of gold coins for the login page.",
+      "imageUrl": "https://images.unsplash.com/photo-1589758414995-17a41e8c7834?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxnb2xkJTIwY29pbnN8ZW58MHx8fHwxNzYzMzEwNTc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gold coins"
     }
   ]
 }
