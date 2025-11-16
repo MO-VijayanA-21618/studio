@@ -38,7 +38,7 @@ export function PhotoCaptureStep() {
     }
   };
 
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) return;
     
     const canvas = canvasRef.current;

@@ -52,7 +52,7 @@ export function GoldItemsStep() {
     }
   };
   
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current || captureItemIndex === null) return;
     
     const canvas = canvasRef.current;
