@@ -53,7 +53,7 @@ export function LoginForm() {
     } catch (error: any) {
       toast({
         title: "உள்நுழைவு தோல்வி",
-        description: error.message || "தவறான மின்னஞ்சல் அல்லது கடவுச்சொல்",
+        description: error.message || "தவறான மின்னஞ்சel அல்லது கடவுச்சொல்",
         variant: "destructive",
       });
     } finally {
