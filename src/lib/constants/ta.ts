@@ -59,6 +59,6 @@ export const ta = {
     renewals: 'புதுப்பித்தல்கள்',
     repayments: 'திருப்பிச் செலுத்துதல்',
     auctions: 'ஏலங்கள்',
-    closures: 'மூடல்கள்',
+    closures: 'கணக்கு முடிவு',
   }
 };
