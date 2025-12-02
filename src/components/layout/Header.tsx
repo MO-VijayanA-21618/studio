@@ -16,12 +16,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SidebarTrigger, useSidebar } from '../ui/sidebar';
-import { ta } from '@/lib/constants/ta';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Logo } from '../icons/Logo';
+import { LanguageSwitch } from '../ui/language-switch';
 
 export function Header() {
   const router = useRouter();
   const { isMobile } = useSidebar();
+  const { t } = useLanguage();
 
   const handleLogout = () => {
     // In a real app, call Firebase signOut
@@ -42,6 +44,7 @@ export function Header() {
       <div className="w-full flex-1">
         {!isMobile && <Logo className="hidden md:block h-10 w-auto" />}
       </div>
+      <LanguageSwitch />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full">
@@ -54,7 +57,7 @@ export function Header() {
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive focus:bg-destructive/10">
             <LogOut className="mr-2 h-4 w-4" />
-            <span>{ta.common.logout}</span>
+            <span>{t.common.logout}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

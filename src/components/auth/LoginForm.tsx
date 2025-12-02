@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { ta } from '@/lib/constants/ta';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Logo } from '../icons/Logo';
 import { signIn } from '@/lib/firebase/auth';
 
@@ -31,6 +31,7 @@ export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useLanguage();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,7 +48,7 @@ export function LoginForm() {
       await signIn(values.email, values.password);
       toast({
         title: "வெற்றிகரமாக உள்நுழைந்துள்ளீர்கள்",
-        description: ta.login.welcome,
+        description: t.login.welcome,
       });
       router.push('/dashboard');
     } catch (error: any) {
@@ -66,9 +67,9 @@ export function LoginForm() {
       <div className="flex flex-col items-center gap-2 text-center">
         <Logo className="mb-2 h-14 w-auto"/>
         <h1 className="font-headline text-3xl font-bold text-primary">
-          {ta.login.welcome}
+          {t.login.welcome}
         </h1>
-        <p className="text-muted-foreground">{ta.login.title}</p>
+        <p className="text-muted-foreground">{t.login.title}</p>
       </div>
 
       <Form {...form}>
@@ -78,7 +79,7 @@ export function LoginForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{ta.login.emailLabel}</FormLabel>
+                <FormLabel>{t.login.emailLabel}</FormLabel>
                 <FormControl>
                   <Input placeholder="name@example.com" {...field} />
                 </FormControl>
@@ -91,7 +92,7 @@ export function LoginForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{ta.login.passwordLabel}</FormLabel>
+                <FormLabel>{t.login.passwordLabel}</FormLabel>
                 <FormControl>
                   <Input type="password" placeholder="••••••••" {...field} />
                 </FormControl>
@@ -103,10 +104,10 @@ export function LoginForm() {
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {ta.login.loggingIn}
+                {t.login.loggingIn}
               </>
             ) : (
-              ta.login.loginButton
+              t.login.loginButton
             )}
           </Button>
         </form>

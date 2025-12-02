@@ -8,6 +8,7 @@ import {
   Handshake,
   Landmark,
   ShieldCheck,
+  Calculator,
 } from 'lucide-react';
 
 import {
@@ -20,22 +21,26 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons/Logo';
-import { ta } from '@/lib/constants/ta';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
 
-const menuItems = [
-  { href: '/dashboard', label: ta.sidebar.dashboard, icon: LayoutDashboard },
-  { href: '/loans/create', label: ta.sidebar.createLoan, icon: PlusCircle },
-  { href: '/loans', label: ta.sidebar.allLoans, icon: List },
-  { href: '/renewals', label: ta.sidebar.renewals, icon: RefreshCw },
-  { href: '/repayments', label: ta.sidebar.repayments, icon: Handshake },
-  { href: '/auctions', label: ta.sidebar.auctions, icon: Landmark },
-  { href: '/closures', label: ta.sidebar.closures, icon: ShieldCheck },
-];
+
 
 export function SidebarNav() {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const { t } = useLanguage();
+
+  const menuItems = [
+    { href: '/dashboard', label: t.sidebar.dashboard, icon: LayoutDashboard },
+    { href: '/loans/create', label: t.sidebar.createLoan, icon: PlusCircle },
+    { href: '/loans', label: t.sidebar.allLoans, icon: List },
+    { href: '/renewals', label: t.sidebar.renewals, icon: RefreshCw },
+    { href: '/repayments', label: t.sidebar.repayments, icon: Handshake },
+    { href: '/auctions', label: t.sidebar.auctions, icon: Landmark },
+    { href: '/closures', label: t.sidebar.closures, icon: ShieldCheck },
+    { href: '/accounting', label: 'Accounting', icon: Calculator },
+  ];
 
   return (
     <>
@@ -62,7 +67,7 @@ export function SidebarNav() {
       </SidebarContent>
       <SidebarFooter>
         <p className="text-xs text-muted-foreground p-2 group-data-[collapsible=icon]:hidden">
-          © 2024 நாலண்டாவர் ஃபைனான்ஸ்
+          © 2024 {t.login.companyName}
         </p>
       </SidebarFooter>
     </>

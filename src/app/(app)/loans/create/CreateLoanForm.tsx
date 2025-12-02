@@ -16,7 +16,8 @@ import { LoanItemSchema, CustomerSchema } from '@/lib/types';
 import { ta } from '@/lib/constants/ta';
 import { useToast } from '@/hooks/use-toast';
 import { LoanPreviewModal } from './_components/LoanPreviewModal';
-import { createCustomer, createLoan } from '@/lib/firebase/firestore';
+import { createCustomer } from '@/lib/firebase/firestore';
+import { createLoanWithAccounting } from '@/lib/firebase/loans-with-accounting';
 
 const CreateLoanFormSchema = z.object({
   customer: CustomerSchema,
@@ -111,9 +112,9 @@ export function CreateLoanForm() {
         customerPhoto: data.customerPhoto
       };
       
-      console.log('Creating loan:', loanData);
-      const loanDoc = await createLoan(loanData);
-      console.log('Loan created:', loanDoc.id);
+      console.log('Creating loan with accounting:', loanData);
+      const loanId = await createLoanWithAccounting(loanData, auth.currentUser.uid);
+      console.log('Loan created with accounting entries:', loanId);
       
       toast({
         title: "கடன் வெற்றிகரமாக உருவாக்கப்பட்டது",

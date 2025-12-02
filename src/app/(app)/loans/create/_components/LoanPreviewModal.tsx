@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Download, Eye } from 'lucide-react';
 import type { LoanItem, Customer } from '@/lib/types';
-import { generateReceiptPDF } from '@/lib/utils/receipt-generator';
+import { generateLoanReceipt } from '@/lib/utils/receipt-generator';
 
 interface LoanPreviewModalProps {
   isOpen: boolean;
@@ -59,18 +59,20 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
   const generateReceipt = async () => {
     try {
       const receiptData = {
-        customer: data.customer,
-        loanItems: data.loanItems,
-        goldRate: data.goldRate,
+        loanNumber: `LN${Date.now().toString().slice(-3)}`,
+        customerName: data.customer.name,
+        customerPhone: data.customer.phone,
+        customerAddress: data.customer.address,
         loanAmount: data.loanAmount,
+        goldItems: data.loanItems,
+        goldRate: data.goldRate,
         totalWeight,
         estimatedValue,
-        interestRate,
-        customerPhoto: data.customerPhoto,
-        emiSchedule
+        loanDate: new Date()
       };
       
-      await generateReceiptPDF(receiptData);
+      const pdf = generateLoanReceipt(receiptData);
+      pdf.save(`Loan_Receipt_${receiptData.loanNumber}.pdf`);
     } catch (error) {
       console.error('Error generating receipt:', error);
       alert('Failed to generate receipt. Please try again.');

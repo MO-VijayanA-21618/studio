@@ -1,172 +1,183 @@
 import jsPDF from 'jspdf';
-import QRCode from 'qrcode';
+import { format } from 'date-fns';
 
-interface ReceiptData {
-  customer: {
-    name: string;
-    phone: string;
-    address: string;
-  };
-  loanItems: Array<{
+interface LoanReceiptData {
+  loanNumber: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress: string;
+  loanAmount: number;
+  goldItems: Array<{
     name: string;
     weight: number;
     purity: string;
-    photo?: string | null;
   }>;
   goldRate: number;
-  loanAmount: number;
   totalWeight: number;
   estimatedValue: number;
-  interestRate: number;
-  customerPhoto?: string | null;
-  emiSchedule: Array<{
-    month: number;
-    date: string;
-    principal: number;
-    interest: number;
-    total: number;
-  }>;
+  loanDate: Date;
 }
 
-export const generateReceiptPDF = async (data: ReceiptData) => {
-  const doc = new jsPDF();
+export const generateLoanReceipt = (loanData: LoanReceiptData) => {
+  const pdf = new jsPDF('landscape', 'mm', 'a4');
   
-  // Generate unique receipt ID
-  const receiptId = `LN${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  // Page dimensions
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
   
-  // Generate QR code
-  const qrCodeData = `Receipt ID: ${receiptId}\nCustomer: ${data.customer.name}\nAmount: ₹${data.loanAmount}`;
-  const qrCodeDataURL = await QRCode.toDataURL(qrCodeData);
+  // Colors
+  const primaryColor = '#D4AF37'; // Gold color
+  const textColor = '#000000';
   
   // Header
-  doc.setFontSize(20);
-  doc.text('GOLD LOAN RECEIPT', 105, 20, { align: 'center' });
+  pdf.setFillColor(primaryColor);
+  pdf.rect(0, 0, pageWidth, 25, 'F');
   
-  // Receipt ID
-  doc.setFontSize(12);
-  doc.text(`Receipt ID: ${receiptId}`, 20, 35);
-  doc.text(`Date: ${new Date().toLocaleDateString()}`, 150, 35);
+  pdf.setTextColor('#FFFFFF');
+  pdf.setFontSize(20);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('NALANDAVAR FINANCE', pageWidth / 2, 12, { align: 'center' });
+  pdf.setFontSize(12);
+  pdf.text('Gold Loan Receipt', pageWidth / 2, 20, { align: 'center' });
   
-  // QR Code and Customer Photo
-  doc.addImage(qrCodeDataURL, 'PNG', 160, 45, 30, 30);
+  // Reset text color
+  pdf.setTextColor(textColor);
   
-  // Customer Photo (if available)
-  if (data.customerPhoto) {
-    doc.addImage(data.customerPhoto, 'JPEG', 160, 80, 30, 30);
-  }
+  // Receipt details box
+  pdf.setDrawColor(primaryColor);
+  pdf.setLineWidth(0.5);
+  pdf.rect(10, 35, pageWidth - 20, 25);
   
-  // Customer Details
-  doc.setFontSize(14);
-  doc.text('Customer Details:', 20, 50);
-  doc.setFontSize(10);
-  doc.text(`Name: ${data.customer.name}`, 20, 60);
-  doc.text(`Phone: ${data.customer.phone}`, 20, 67);
-  doc.text(`Address: ${data.customer.address}`, 20, 74);
+  // Receipt info
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Receipt No:', 15, 45);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(loanData.loanNumber, 50, 45);
   
-  // Loan Details
-  doc.setFontSize(14);
-  doc.text('Loan Details:', 20, 90);
-  doc.setFontSize(10);
-  doc.text(`Loan Amount: ₹${data.loanAmount.toLocaleString()}`, 20, 100);
-  doc.text(`Gold Rate: ₹${data.goldRate}/gram`, 20, 107);
-  doc.text(`Total Weight: ${data.totalWeight}g`, 20, 114);
-  doc.text(`Estimated Value: ₹${data.estimatedValue.toLocaleString()}`, 20, 121);
-  doc.text(`Interest Rate: ${data.interestRate}% per annum`, 20, 128);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Date:', pageWidth - 80, 45);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(format(loanData.loanDate, 'dd/MM/yyyy'), pageWidth - 50, 45);
   
-  // Items Pledged
-  doc.setFontSize(14);
-  doc.text('Items Pledged:', 20, 145);
-  doc.setFontSize(10);
-  let yPos = 155;
-  data.loanItems.forEach((item, index) => {
-    doc.text(`${index + 1}. ${item.name} - ${item.weight}g (${item.purity}K)`, 20, yPos);
-    yPos += 7;
-  });
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Time:', pageWidth - 80, 55);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(format(loanData.loanDate, 'HH:mm'), pageWidth - 50, 55);
   
-  // EMI Schedule
+  // Customer details
+  let yPos = 75;
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(14);
+  pdf.text('CUSTOMER DETAILS', 15, yPos);
+  
   yPos += 10;
-  doc.setFontSize(14);
-  doc.text('EMI Schedule:', 20, yPos);
-  yPos += 10;
-  doc.setFontSize(8);
+  pdf.setFontSize(11);
   
+  // Left side - Name and Phone
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Name:', 15, yPos);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(loanData.customerName, 50, yPos);
+  
+  yPos += 8;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Phone:', 15, yPos);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(loanData.customerPhone, 50, yPos);
+  
+  // Right side - Address
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Address:', 150, yPos - 8);
+  pdf.setFont('helvetica', 'normal');
+  const addressLines = pdf.splitTextToSize(loanData.customerAddress, 120);
+  pdf.text(addressLines, 190, yPos - 8);
+  
+  // Gold items table
+  yPos += 20;
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(14);
+  pdf.text('GOLD ITEMS PLEDGED', 15, yPos);
+  
+  yPos += 10;
   // Table headers
-  doc.text('EMI No.', 20, yPos);
-  doc.text('Due Date', 50, yPos);
-  doc.text('Principal', 90, yPos);
-  doc.text('Interest', 130, yPos);
-  doc.text('Total EMI', 170, yPos);
-  yPos += 5;
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('S.No', 15, yPos);
+  pdf.text('Item Description', 35, yPos);
+  pdf.text('Weight (gms)', 120, yPos);
+  pdf.text('Purity', 160, yPos);
+  pdf.text('Rate/gm', 190, yPos);
+  pdf.text('Value (₹)', 220, yPos);
   
   // Table line
-  doc.line(20, yPos, 190, yPos);
-  yPos += 5;
+  pdf.line(15, yPos + 2, pageWidth - 15, yPos + 2);
   
-  data.emiSchedule.forEach((emi) => {
-    if (yPos > 270) {
-      doc.addPage();
-      yPos = 20;
-    }
-    doc.text(emi.month.toString(), 20, yPos);
-    doc.text(emi.date, 50, yPos);
-    doc.text(`₹${emi.principal?.toFixed(0) || '0'}`, 90, yPos);
-    doc.text(`₹${emi.interest?.toFixed(0) || '0'}`, 130, yPos);
-    doc.text(`₹${emi.total.toFixed(0)}`, 170, yPos);
-    yPos += 7;
+  yPos += 8;
+  pdf.setFont('helvetica', 'normal');
+  
+  loanData.goldItems.forEach((item, index) => {
+    const itemValue = item.weight * loanData.goldRate * (parseInt(item.purity) / 24);
+    
+    pdf.text((index + 1).toString(), 15, yPos);
+    pdf.text(item.name, 35, yPos);
+    pdf.text(item.weight.toString(), 120, yPos);
+    pdf.text(`${item.purity}K`, 160, yPos);
+    pdf.text(`₹${loanData.goldRate}`, 190, yPos);
+    pdf.text(`₹${itemValue.toLocaleString()}`, 220, yPos);
+    
+    yPos += 6;
   });
   
-  // Add second page for item photos if available
-  const itemsWithPhotos = data.loanItems.filter(item => item.photo);
-  if (itemsWithPhotos.length > 0) {
-    doc.addPage();
-    yPos = 20;
-    
-    doc.setFontSize(16);
-    doc.text('Item Photos', 105, yPos, { align: 'center' });
-    yPos += 20;
-    
-    let photosPerRow = 2;
-    let photoWidth = 80;
-    let photoHeight = 60;
-    let xStart = 20;
-    let currentX = xStart;
-    let currentY = yPos;
-    
-    itemsWithPhotos.forEach((item, index) => {
-      if (item.photo) {
-        // Add item photo
-        doc.addImage(item.photo, 'JPEG', currentX, currentY, photoWidth, photoHeight);
-        
-        // Add item name below photo
-        doc.setFontSize(10);
-        doc.text(item.name, currentX + photoWidth/2, currentY + photoHeight + 10, { align: 'center' });
-        doc.text(`${item.weight}g (${item.purity}K)`, currentX + photoWidth/2, currentY + photoHeight + 17, { align: 'center' });
-        
-        // Move to next position
-        currentX += photoWidth + 10;
-        if ((index + 1) % photosPerRow === 0) {
-          currentX = xStart;
-          currentY += photoHeight + 30;
-        }
-        
-        // Check if we need a new page
-        if (currentY > 200) {
-          doc.addPage();
-          currentY = 20;
-          currentX = xStart;
-        }
-      }
-    });
-  }
+  // Total line
+  pdf.line(15, yPos, pageWidth - 15, yPos);
+  yPos += 8;
   
-  // Footer on last page
-  yPos = doc.internal.pageSize.height - 30;
-  doc.setFontSize(8);
-  doc.text('This is a computer generated receipt.', 105, yPos, { align: 'center' });
-  doc.text(`Receipt ID: ${receiptId}`, 105, yPos + 7, { align: 'center' });
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('TOTAL WEIGHT:', 120, yPos);
+  pdf.text(`${loanData.totalWeight} gms`, 160, yPos);
+  pdf.text('TOTAL VALUE:', 190, yPos);
+  pdf.text(`₹${loanData.estimatedValue.toLocaleString()}`, 220, yPos);
   
-  // Save PDF
-  doc.save(`loan-receipt-${receiptId}.pdf`);
+  // Loan amount section
+  yPos += 15;
+  pdf.setTextColor(textColor);
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('LOAN AMOUNT SANCTIONED:', 15, yPos);
+  pdf.text(`₹${loanData.loanAmount.toLocaleString()}`, pageWidth - 80, yPos);
   
-  return receiptId;
+  // Terms and conditions
+  yPos += 25;
+  pdf.setTextColor(textColor);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('TERMS & CONDITIONS:', 15, yPos);
+  
+  yPos += 6;
+  pdf.setFont('helvetica', 'normal');
+  const terms = [
+    '1. Interest rate as per company policy will be applicable',
+    '2. Pledged gold articles are insured against fire and theft',
+    '3. This receipt must be produced at the time of repayment',
+    '4. Company is not responsible for any damage to ornaments due to testing',
+    '5. Loan can be renewed by paying interest amount'
+  ];
+  
+  terms.forEach(term => {
+    pdf.text(term, 15, yPos);
+    yPos += 5;
+  });
+  
+  // Footer
+  yPos = pageHeight - 25;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Customer Signature', 50, yPos);
+  pdf.text('Authorized Signatory', pageWidth - 80, yPos);
+  
+  // Signature lines
+  pdf.line(15, yPos + 5, 100, yPos + 5);
+  pdf.line(pageWidth - 120, yPos + 5, pageWidth - 15, yPos + 5);
+  
+  return pdf;
 };

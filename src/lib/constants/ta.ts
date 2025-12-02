@@ -2,6 +2,7 @@ export const ta = {
   login: {
     title: 'உள்நுழை',
     welcome: 'நல்லாண்டவர் ஃபைனான்ஸ்-க்கு வரவேற்கிறோம்',
+    companyName: 'நல்லாண்டவர் ஃபைனான்ஸ்',
     emailLabel: 'மின்னஞ்சல்',
     passwordLabel: 'கடவுச்சொல்',
     loginButton: 'உள்நுழையவும்',
@@ -60,5 +61,16 @@ export const ta = {
     repayments: 'திருப்பிச் செலுத்துதல்',
     auctions: 'ஏலங்கள்',
     closures: 'மூடல்கள்',
+    accounting: 'கணக்கியல்',
+  },
+  accounting: {
+    title: 'கணக்கியல்',
+    dayBook: 'நாள் புத்தகம்',
+    voucherEntries: 'வவுச்சர் பதிவுகள்',
+    trialBalance: 'சோதனை இருப்பு',
+    cashInHand: 'கையில் பணம்',
+    loansOutstanding: 'நிலுவையில் உள்ள கடன்கள்',
+    todayReceipts: 'இன்றைய வரவுகள்',
+    todayPayments: 'இன்றைய செலவுகள்',
   }
 };

@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     // For this example, we'll just redirect to login.
@@ -16,7 +18,7 @@ export default function Home() {
     <div className="flex h-screen w-full items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <p className="text-muted-foreground">Loading நாலண்டாவர் ஃபைனான்ஸ்...</p>
+        <p className="text-muted-foreground">Loading {t.login.companyName}...</p>
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 import React from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Logo(props: React.SVGProps<SVGSVGElement>) {
+  const { t } = useLanguage();
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -34,7 +36,7 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
         fill="hsl(var(--foreground))"
         className="transition-colors"
       >
-        நாலண்டாவர் ஃபைனான்ஸ்
+        {t.login.companyName}
       </text>
     </svg>
   );
