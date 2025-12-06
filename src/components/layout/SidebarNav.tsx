@@ -9,6 +9,7 @@ import {
   Landmark,
   ShieldCheck,
   Calculator,
+  Users,
 } from 'lucide-react';
 
 import {
@@ -22,6 +23,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons/Logo';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePermissions } from '@/hooks/use-permissions';
 import Link from 'next/link';
 
 
@@ -30,17 +32,21 @@ export function SidebarNav() {
   const pathname = usePathname();
   const { state } = useSidebar();
   const { t } = useLanguage();
+  const { hasPermission } = usePermissions();
 
-  const menuItems = [
-    { href: '/dashboard', label: t.sidebar.dashboard, icon: LayoutDashboard },
-    { href: '/loans/create', label: t.sidebar.createLoan, icon: PlusCircle },
-    { href: '/loans', label: t.sidebar.allLoans, icon: List },
-    { href: '/renewals', label: t.sidebar.renewals, icon: RefreshCw },
-    { href: '/repayments', label: t.sidebar.repayments, icon: Handshake },
-    { href: '/auctions', label: t.sidebar.auctions, icon: Landmark },
-    { href: '/closures', label: t.sidebar.closures, icon: ShieldCheck },
-    { href: '/accounting', label: 'Accounting', icon: Calculator },
+  const allMenuItems = [
+    { href: '/dashboard', label: t.sidebar.dashboard, icon: LayoutDashboard, show: true },
+    { href: '/loans/create', label: t.sidebar.createLoan, icon: PlusCircle, show: hasPermission('loans', 'create') },
+    { href: '/loans', label: t.sidebar.allLoans, icon: List, show: hasPermission('loans', 'read') },
+    { href: '/renewals', label: t.sidebar.renewals, icon: RefreshCw, show: hasPermission('loans', 'update') },
+    { href: '/repayments', label: t.sidebar.repayments, icon: Handshake, show: hasPermission('loans', 'update') },
+    { href: '/auctions', label: t.sidebar.auctions, icon: Landmark, show: hasPermission('loans', 'update') },
+    { href: '/closures', label: t.sidebar.closures, icon: ShieldCheck, show: hasPermission('loans', 'update') },
+    { href: '/accounting', label: 'Accounting', icon: Calculator, show: hasPermission('accounting', 'read') },
+    { href: '/users', label: 'Users', icon: Users, show: hasPermission('users', 'read') },
   ];
+
+  const menuItems = allMenuItems.filter(item => item.show);
 
   return (
     <>

@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Logo } from '../icons/Logo';
 import { signIn } from '@/lib/firebase/auth';
+import Link from 'next/link';
 
 const formSchema = z.object({
   email: z.string().email('தவறான மின்னஞ்சல்'),
@@ -112,6 +113,9 @@ export function LoginForm() {
           </Button>
         </form>
       </Form>
+      <div className="text-center text-sm">
+        <Link href="/forgot-password" className="text-primary hover:underline">Forgot Password?</Link>
+      </div>
     </div>
   );
 }
