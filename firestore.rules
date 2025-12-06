@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users must be authenticated
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Customers collection
+    match /customers/{customerId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Loans collection
+    match /loans/{loanId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Transactions collection
+    match /transactions/{transactionId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Settings collection
+    match /settings/{settingId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
