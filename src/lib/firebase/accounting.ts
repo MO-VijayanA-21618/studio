@@ -16,6 +16,7 @@ import { Account, VoucherEntry, JournalEntry } from '@/lib/types/accounting';
 
 // Initialize Chart of Accounts
 export const initializeChartOfAccounts = async () => {
+  if (!db) throw new Error('Firestore not initialized');
   const accounts: Omit<Account, 'id' | 'createdAt'>[] = [
     { code: '1001', name: 'Cash in Hand', type: 'ASSET', subType: 'CASH', balance: 0, isActive: true },
     { code: '1201', name: 'Loans Receivable', type: 'ASSET', subType: 'LOANS_RECEIVABLE', balance: 0, isActive: true },
@@ -36,6 +37,7 @@ export const initializeChartOfAccounts = async () => {
 
 // Create voucher entry with journal entries
 export const createVoucherEntry = async (voucher: Omit<VoucherEntry, 'id' | 'createdAt'>) => {
+  if (!db) throw new Error('Firestore not initialized');
   return await runTransaction(db, async (transaction) => {
     // First, read all account documents
     const accountRefs = voucher.entries.map(entry => doc(db, 'accounts', entry.accountId));
@@ -64,6 +66,7 @@ export const createVoucherEntry = async (voucher: Omit<VoucherEntry, 'id' | 'cre
 
 // Get trial balance
 export const getTrialBalance = async (asOfDate?: Date) => {
+  if (!db) throw new Error('Firestore not initialized');
   const accountsQuery = query(
     collection(db, 'accounts'),
     where('isActive', '==', true)
@@ -89,6 +92,7 @@ export const getTrialBalance = async (asOfDate?: Date) => {
 
 // Get vouchers for a date range
 export const getVouchers = async (startDate: Date, endDate: Date) => {
+  if (!db) throw new Error('Firestore not initialized');
   const vouchersQuery = query(
     collection(db, 'vouchers'),
     where('date', '>=', Timestamp.fromDate(startDate)),

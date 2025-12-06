@@ -3,6 +3,7 @@ import { db } from './client';
 
 export const getDashboardStats = async () => {
   try {
+    if (!db) throw new Error('Firestore not initialized');
     // Get all loans
     const loansSnapshot = await getDocs(collection(db, 'loans'));
     const loans = loansSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

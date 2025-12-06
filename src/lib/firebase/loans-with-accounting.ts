@@ -10,6 +10,7 @@ export const createLoanWithAccounting = async (
   userId: string
 ) => {
   try {
+    if (!db) throw new Error('Firestore not initialized');
     // Generate loan number
     const loanNumber = await generateLoanNumber();
     
@@ -45,6 +46,7 @@ export const processLoanRepayment = async (
   userId: string
 ) => {
   try {
+    if (!db) throw new Error('Firestore not initialized');
     // Update loan status
     await updateDoc(doc(db, 'loans', loanId), {
       status: 'Closed',
