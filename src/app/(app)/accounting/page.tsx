@@ -1,16 +1,18 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+export const dynamic = 'force-dynamic';
+
+import dynamicImport from 'next/dynamic';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Dynamically import components to prevent SSR issues
-const TrialBalance = dynamic(() => import('@/components/accounting/TrialBalance').then(mod => ({ default: mod.TrialBalance })), { ssr: false });
-const VoucherEntries = dynamic(() => import('@/components/accounting/VoucherEntries').then(mod => ({ default: mod.VoucherEntries })), { ssr: false });
-const DayBook = dynamic(() => import('@/components/accounting/DayBook').then(mod => ({ default: mod.DayBook })), { ssr: false });
-const AccountingSetup = dynamic(() => import('@/components/setup/AccountingSetup').then(mod => ({ default: mod.AccountingSetup })), { ssr: false });
-const ManualJournalEntry = dynamic(() => import('@/components/accounting/ManualJournalEntry').then(mod => ({ default: mod.ManualJournalEntry })), { ssr: false });
-const QuickEntryTemplates = dynamic(() => import('@/components/accounting/QuickEntryTemplates').then(mod => ({ default: mod.QuickEntryTemplates })), { ssr: false });
-const LedgerView = dynamic(() => import('@/components/accounting/LedgerView').then(mod => ({ default: mod.LedgerView })), { ssr: false });
+const TrialBalance = dynamicImport(() => import('@/components/accounting/TrialBalance').then(mod => ({ default: mod.TrialBalance })), { ssr: false });
+const VoucherEntries = dynamicImport(() => import('@/components/accounting/VoucherEntries').then(mod => ({ default: mod.VoucherEntries })), { ssr: false });
+const DayBook = dynamicImport(() => import('@/components/accounting/DayBook').then(mod => ({ default: mod.DayBook })), { ssr: false });
+const AccountingSetup = dynamicImport(() => import('@/components/setup/AccountingSetup').then(mod => ({ default: mod.AccountingSetup })), { ssr: false });
+const ManualJournalEntry = dynamicImport(() => import('@/components/accounting/ManualJournalEntry').then(mod => ({ default: mod.ManualJournalEntry })), { ssr: false });
+const QuickEntryTemplates = dynamicImport(() => import('@/components/accounting/QuickEntryTemplates').then(mod => ({ default: mod.QuickEntryTemplates })), { ssr: false });
+const LedgerView = dynamicImport(() => import('@/components/accounting/LedgerView').then(mod => ({ default: mod.LedgerView })), { ssr: false });
 
 export default function AccountingPage() {
   return (

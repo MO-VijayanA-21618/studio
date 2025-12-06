@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { CreateLoanForm } from "./CreateLoanForm";
 import { ta } from "@/lib/constants/ta";
 

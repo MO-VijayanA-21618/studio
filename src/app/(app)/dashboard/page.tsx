@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { RecentLoansTable } from '@/components/dashboard/RecentLoansTable';
