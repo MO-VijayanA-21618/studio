@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Image from 'next/image';
 import { LoginForm } from '@/components/auth/LoginForm';
 import loginImage from '@/lib/image1.png';
