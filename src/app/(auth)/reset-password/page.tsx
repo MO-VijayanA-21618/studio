@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { confirmPasswordReset } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -45,33 +45,41 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Reset Password</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {success ? (
-            <div className="space-y-4">
-              <p className="text-green-600">Password reset successful! Redirecting to login...</p>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Reset Password</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {success ? (
+          <div className="space-y-4">
+            <p className="text-green-600">Password reset successful! Redirecting to login...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label>New Password</Label>
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>New Password</Label>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              </div>
-              <div>
-                <Label>Confirm Password</Label>
-                <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-              </div>
-              {error && <p className="text-red-600 text-sm">{error}</p>}
-              <Button type="submit" className="w-full">Reset Password</Button>
-              <Link href="/login"><Button variant="outline" className="w-full">Back to Login</Button></Link>
-            </form>
-          )}
-        </CardContent>
-      </Card>
+            <div>
+              <Label>Confirm Password</Label>
+              <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+            </div>
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+            <Button type="submit" className="w-full">Reset Password</Button>
+            <Link href="/login"><Button variant="outline" className="w-full">Back to Login</Button></Link>
+          </form>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <Suspense fallback={<div>Loading...</div>}>
+        <ResetPasswordForm />
+      </Suspense>
     </div>
   );
 }
