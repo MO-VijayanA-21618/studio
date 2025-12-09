@@ -11,6 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { Download, Eye } from 'lucide-react';
 import type { LoanItem, Customer } from '@/lib/types';
 import { generateLoanReceipt } from '@/lib/utils/receipt-generator';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/client';
 
 interface LoanPreviewModalProps {
   isOpen: boolean;
@@ -33,6 +35,9 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
   
   const generateReceipt = async () => {
     try {
+      const settingsDoc = await getDoc(doc(db, 'settings', 'global'));
+      const settings = settingsDoc.exists() ? settingsDoc.data() : {};
+      
       const receiptData = {
         loanNumber: `LN${Date.now().toString().slice(-3)}`,
         customerName: data.customer.name,
@@ -43,7 +48,10 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
         goldRate: data.goldRate,
         totalWeight,
         estimatedValue,
-        loanDate: new Date()
+        loanDate: new Date(),
+        companyAddress: settings.companyAddress,
+        companyPhone: settings.companyPhone,
+        companyEmail: settings.companyEmail,
       };
       
       const pdf = generateLoanReceipt(receiptData);
