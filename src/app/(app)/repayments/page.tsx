@@ -13,12 +13,14 @@ import { getLoans, getLoansByStatus, updateLoanStatus, createTransaction } from 
 import { Loan } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Check } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 export default function RepaymentsPage() {
   const [activeLoans, setActiveLoans] = useState<Loan[]>([]);
   const [filteredLoans, setFilteredLoans] = useState<Loan[]>([]);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [repaymentType, setRepaymentType] = useState<'interest' | 'principal'>('interest');
   const [repaymentAmount, setRepaymentAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -194,7 +196,21 @@ export default function RepaymentsPage() {
             </div>
             
             <div>
-              <Label>Repayment Amount</Label>
+              <Label>Repayment Type</Label>
+              <RadioGroup value={repaymentType} onValueChange={(value) => setRepaymentType(value as 'interest' | 'principal')}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="interest" id="interest-type" />
+                  <Label htmlFor="interest-type">Interest Repayment</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="principal" id="principal-type" />
+                  <Label htmlFor="principal-type">Principal Repayment</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            
+            <div>
+              <Label>{repaymentType === 'interest' ? 'Interest Amount' : 'Principal Amount'}</Label>
               <Input
                 type="number"
                 placeholder="Enter amount"

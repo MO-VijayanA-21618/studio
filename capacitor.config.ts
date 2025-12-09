@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Gold Finance',
   webDir: 'out',
   server: {
-    url: 'https://studio--finapp-1fe29.asia-southeast1.hosted.app',
+    url: 'https://studio--studio-7712678722-d9e3d.us-central1.hosted.app',
     cleartext: true
   }
 };

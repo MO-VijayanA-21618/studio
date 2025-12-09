@@ -63,8 +63,10 @@ export function LedgerView() {
             const amount = entry.debit - entry.credit;
             runningBalance += amount;
             
+            const voucherDate = voucher.date instanceof Date ? voucher.date : voucher.date?.toDate?.() || new Date();
+            
             entries.push({
-              date: voucher.date,
+              date: voucherDate,
               voucherNumber: voucher.voucherNumber,
               description: entry.description,
               debit: entry.debit,
@@ -133,7 +135,7 @@ export function LedgerView() {
             ) : (
               ledgerEntries.map((entry, index) => (
                 <TableRow key={index}>
-                  <TableCell>{format(new Date(entry.date), 'dd/MM/yyyy')}</TableCell>
+                  <TableCell>{entry.date instanceof Date && !isNaN(entry.date.getTime()) ? format(entry.date, 'dd/MM/yyyy') : 'Invalid Date'}</TableCell>
                   <TableCell>{entry.voucherNumber}</TableCell>
                   <TableCell>{entry.description}</TableCell>
                   <TableCell className="text-right">
