@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { processLoanRepayment } from '@/lib/firebase/loans-with-accounting';
 import { useToast } from '@/hooks/use-toast';
 
@@ -16,7 +17,8 @@ interface RepaymentFormProps {
 }
 
 export function RepaymentForm({ loanId, customerName, outstandingAmount, onSuccess }: RepaymentFormProps) {
-  const [principalAmount, setPrincipalAmount] = useState(outstandingAmount);
+  const [repaymentType, setRepaymentType] = useState<'interest' | 'principal'>('interest');
+  const [principalAmount, setPrincipalAmount] = useState(0);
   const [interestAmount, setInterestAmount] = useState(0);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -64,25 +66,43 @@ export function RepaymentForm({ loanId, customerName, outstandingAmount, onSucce
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="principal">Principal Amount</Label>
-          <Input
-            id="principal"
-            type="number"
-            value={principalAmount}
-            onChange={(e) => setPrincipalAmount(Number(e.target.value))}
-            max={outstandingAmount}
-          />
+          <Label>Repayment Type</Label>
+          <RadioGroup value={repaymentType} onValueChange={(value) => setRepaymentType(value as 'interest' | 'principal')}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="interest" id="interest-type" />
+              <Label htmlFor="interest-type">Interest Repayment</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="principal" id="principal-type" />
+              <Label htmlFor="principal-type">Principal Repayment</Label>
+            </div>
+          </RadioGroup>
         </div>
 
-        <div>
-          <Label htmlFor="interest">Interest Amount</Label>
-          <Input
-            id="interest"
-            type="number"
-            value={interestAmount}
-            onChange={(e) => setInterestAmount(Number(e.target.value))}
-          />
-        </div>
+        {repaymentType === 'interest' && (
+          <div>
+            <Label htmlFor="interest">Interest Amount</Label>
+            <Input
+              id="interest"
+              type="number"
+              value={interestAmount}
+              onChange={(e) => setInterestAmount(Number(e.target.value))}
+            />
+          </div>
+        )}
+
+        {repaymentType === 'principal' && (
+          <div>
+            <Label htmlFor="principal">Principal Amount</Label>
+            <Input
+              id="principal"
+              type="number"
+              value={principalAmount}
+              onChange={(e) => setPrincipalAmount(Number(e.target.value))}
+              max={outstandingAmount}
+            />
+          </div>
+        )}
 
         <div className="p-4 bg-muted rounded-lg">
           <div className="flex justify-between">

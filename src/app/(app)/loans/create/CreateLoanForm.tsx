@@ -1,6 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
@@ -22,7 +24,10 @@ import { createLoanWithAccounting } from '@/lib/firebase/loans-with-accounting';
 const CreateLoanFormSchema = z.object({
   customer: CustomerSchema,
   loanItems: z.array(LoanItemSchema).min(1, "Please add at least one gold item."),
-  goldRate: z.number({ required_error: "Gold rate is required"}).positive("Gold rate must be positive."),
+  netWeight: z.number().positive(),
+  goldRate: z.union([z.number().positive("Gold rate must be positive."), z.literal('')]).refine(val => val !== '', { message: "Gold rate is required" }),
+  estimatedValue: z.number().positive(),
+  margin: z.number().positive(),
   loanAmount: z.number().positive(),
   customerPhoto: z.string().nullable().optional(),
 });
@@ -49,11 +54,34 @@ export function CreateLoanForm() {
     defaultValues: {
       customer: { name: '', phone: '', address: '' },
       loanItems: [{ name: '', weight: 0, purity: '22', photo: null }],
-      goldRate: 0,
+      netWeight: 0,
+      goldRate: '',
+      estimatedValue: 0,
+      margin: 75,
       loanAmount: 0,
       customerPhoto: null,
     },
   });
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const settingsDoc = await getDoc(doc(db, 'settings', 'global'));
+        if (settingsDoc.exists()) {
+          const settings = settingsDoc.data();
+          if (settings.defaultGoldRate) {
+            methods.setValue('goldRate', settings.defaultGoldRate);
+          }
+          if (settings.ltvRatio) {
+            methods.setValue('margin', settings.ltvRatio);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    };
+    loadSettings();
+  }, [methods]);
 
   const { trigger, handleSubmit, watch } = methods;
 
@@ -62,7 +90,7 @@ export function CreateLoanForm() {
     if (currentStep === 0) isValid = await trigger('customer');
     if (currentStep === 1) isValid = await trigger('loanItems');
     if (currentStep === 2) isValid = true; // Photos are optional
-    if (currentStep === 3) isValid = await trigger(['goldRate', 'loanAmount']);
+    if (currentStep === 3) isValid = await trigger(['netWeight', 'goldRate', 'estimatedValue', 'margin', 'loanAmount']);
 
     if (isValid) {
       if (currentStep < steps.length - 1) {

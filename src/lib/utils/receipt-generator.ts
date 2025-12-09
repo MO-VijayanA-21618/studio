@@ -36,9 +36,11 @@ export const generateLoanReceipt = (loanData: LoanReceiptData) => {
   pdf.setTextColor('#FFFFFF');
   pdf.setFontSize(20);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('NALANDAVAR FINANCE', pageWidth / 2, 12, { align: 'center' });
+  pdf.text('NALLANDAVAR PAWN BROKER AND FINANCE', pageWidth / 2, 10, { align: 'center' });
+  pdf.setFontSize(10);
+  pdf.text('Licence No: 03/2025-2026', pageWidth / 2, 17, { align: 'center' });
   pdf.setFontSize(12);
-  pdf.text('Gold Loan Receipt', pageWidth / 2, 20, { align: 'center' });
+  pdf.text('Gold Loan Receipt', pageWidth / 2, 23, { align: 'center' });
   
   // Reset text color
   pdf.setTextColor(textColor);
@@ -147,36 +149,22 @@ export const generateLoanReceipt = (loanData: LoanReceiptData) => {
   pdf.text('LOAN AMOUNT SANCTIONED:', 15, yPos);
   pdf.text(`₹${loanData.loanAmount.toLocaleString()}`, pageWidth - 80, yPos);
   
-  // Terms and conditions
-  yPos += 25;
-  pdf.setTextColor(textColor);
-  pdf.setFontSize(10);
+  // Signature section
+  yPos += 15;
   pdf.setFont('helvetica', 'bold');
-  pdf.text('TERMS & CONDITIONS:', 15, yPos);
+  pdf.setFontSize(11);
+  pdf.text('Customer Signature:', 15, yPos);
   
-  yPos += 6;
-  pdf.setFont('helvetica', 'normal');
-  const terms = [
-    '1. Interest rate as per company policy will be applicable',
-    '2. Pledged gold articles are insured against fire and theft',
-    '3. This receipt must be produced at the time of repayment',
-    '4. Company is not responsible for any damage to ornaments due to testing',
-    '5. Loan can be renewed by paying interest amount'
-  ];
-  
-  terms.forEach(term => {
-    pdf.text(term, 15, yPos);
-    yPos += 5;
-  });
+  // Signature box for customer
+  pdf.setDrawColor(primaryColor);
+  pdf.rect(15, yPos + 5, 80, 20);
   
   // Footer
   yPos = pageHeight - 25;
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Customer Signature', 50, yPos);
   pdf.text('Authorized Signatory', pageWidth - 80, yPos);
   
-  // Signature lines
-  pdf.line(15, yPos + 5, 100, yPos + 5);
+  // Signature line
   pdf.line(pageWidth - 120, yPos + 5, pageWidth - 15, yPos + 5);
   
   return pdf;

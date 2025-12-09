@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Calculator,
   Users,
+  Settings,
 } from 'lucide-react';
 
 import {
@@ -44,6 +45,7 @@ export function SidebarNav() {
     { href: '/closures', label: t.sidebar.closures, icon: ShieldCheck, show: hasPermission('loans', 'update') },
     { href: '/accounting', label: 'Accounting', icon: Calculator, show: hasPermission('accounting', 'read') },
     { href: '/users', label: 'Users', icon: Users, show: hasPermission('users', 'read') },
+    { href: '/settings', label: 'Settings', icon: Settings, show: hasPermission('users', 'read') },
   ];
 
   const menuItems = allMenuItems.filter(item => item.show);
