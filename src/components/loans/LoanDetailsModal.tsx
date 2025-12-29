@@ -41,7 +41,7 @@ export function LoanDetailsModal({ isOpen, onClose, loan }: LoanDetailsModalProp
           <div>
             <h3 className="font-semibold mb-2">Loan Information</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>Loan ID: <span className="font-mono">{loan.id}</span></div>
+              <div>Loan ID: <span className="font-mono">{loan.loanId || loan.id}</span></div>
               <div>Status: <Badge className={getStatusColor(loan.status)}>{loan.status}</Badge></div>
               <div>Loan Amount: <span className="font-medium">₹{loan.loanAmount.toLocaleString()}</span></div>
               <div>Gold Rate: <span className="font-medium">₹{loan.goldRate}/gram</span></div>

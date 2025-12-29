@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ta } from "@/lib/constants/ta";
 import { getLoans } from '@/lib/firebase/firestore';
 import { Loan } from '@/lib/types';
-import { PlusCircle, Eye, Search } from 'lucide-react';
+import { PlusCircle, Eye, Search, TrendingUp, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { LoanDetailsModal } from '@/components/loans/LoanDetailsModal';
 
@@ -80,12 +80,20 @@ export default function AllLoansPage() {
     <div>
       <div className="flex justify-between items-center mb-8">
         <h1 className="font-headline text-3xl font-bold tracking-tight">{ta.sidebar.allLoans}</h1>
-        <Link href="/loans/create">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create New Loan
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/loans/topup">
+            <Button variant="outline">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Top Up Loan
+            </Button>
+          </Link>
+          <Link href="/loans/create">
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create New Loan
+            </Button>
+          </Link>
+        </div>
       </div>
       
       {/* Search and Filter */}
@@ -147,7 +155,7 @@ export default function AllLoansPage() {
                 <tbody>
                   {filteredLoans.map((loan) => (
                     <tr key={loan.id} className="border-b">
-                      <td className="p-2 font-mono text-xs">{loan.id?.substring(0, 8)}...</td>
+                      <td className="p-2 font-mono text-xs">{loan.loanId || loan.id?.substring(0, 8) + '...'}</td>
                       <td className="p-2">{loan.customerName}</td>
                       <td className="p-2">₹{loan.loanAmount.toLocaleString()}</td>
                       <td className="p-2">{loan.loanDate.toLocaleDateString()}</td>
@@ -157,16 +165,26 @@ export default function AllLoansPage() {
                         </Badge>
                       </td>
                       <td className="p-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            setSelectedLoan(loan);
-                            setIsDetailsOpen(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedLoan(loan);
+                              setIsDetailsOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Link href={`/loans/create?edit=${loan.id}`}>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   ))}

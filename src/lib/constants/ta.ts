@@ -1,8 +1,8 @@
 export const ta = {
   login: {
     title: 'உள்நுழை',
-    welcome: 'நல்லாண்டவர் ஃபைனான்ஸ்-க்கு வரவேற்கிறோம்',
-    companyName: 'நல்லாண்டவர் ஃபைனான்ஸ்',
+    welcome: 'NALLANDAVAR ஃபைனான்ஸ்-க்கு வரவேற்கிறோம்',
+    companyName: 'NALLANDAVAR ஃபைனான்ஸ்',
     emailLabel: 'மின்னஞ்சல்',
     passwordLabel: 'கடவுச்சொல்',
     loginButton: 'உள்நுழையவும்',

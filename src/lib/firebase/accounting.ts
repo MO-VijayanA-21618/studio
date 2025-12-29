@@ -36,17 +36,22 @@ export const initializeChartOfAccounts = async () => {
 };
 
 // Create voucher entry with journal entries
-export const createVoucherEntry = async (voucher: Omit<VoucherEntry, 'id' | 'createdAt'>) => {
+export const createVoucherEntry = async (voucher: Omit<VoucherEntry, 'id' | 'createdAt' | 'createdBy' | 'totalAmount'>) => {
   if (!db) throw new Error('Firestore not initialized');
   return await runTransaction(db, async (transaction) => {
+    // Calculate total amount
+    const totalAmount = voucher.entries.reduce((sum, entry) => sum + entry.debit, 0);
+    
     // First, read all account documents
     const accountRefs = voucher.entries.map(entry => doc(db, 'accounts', entry.accountId));
     const accountDocs = await Promise.all(accountRefs.map(ref => transaction.get(ref)));
 
-    // Create voucher
+    // Create voucher with all required fields
     const voucherRef = doc(collection(db, 'vouchers'));
     transaction.set(voucherRef, {
       ...voucher,
+      totalAmount,
+      createdBy: 'system',
       createdAt: Timestamp.now()
     });
 

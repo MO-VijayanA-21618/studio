@@ -120,7 +120,16 @@ export function GoldItemsStep() {
                 <FormItem>
                     <FormLabel>{ta.createLoan.weight}</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="10.5" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} />
+                        <Input 
+                          placeholder="10.5" 
+                          {...field} 
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '');
+                            // Remove leading zeros except for decimal numbers like 0.5
+                            const cleanValue = value.replace(/^0+(?=\d)/, '');
+                            field.onChange(cleanValue || '0');
+                          }}
+                        />
                     </FormControl>
                     <FormMessage />
                 </FormItem>

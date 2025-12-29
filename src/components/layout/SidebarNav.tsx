@@ -11,6 +11,7 @@ import {
   Calculator,
   Users,
   Settings,
+  TrendingUp,
 } from 'lucide-react';
 
 import {
@@ -39,6 +40,7 @@ export function SidebarNav() {
     { href: '/dashboard', label: t.sidebar.dashboard, icon: LayoutDashboard, show: true },
     { href: '/loans/create', label: t.sidebar.createLoan, icon: PlusCircle, show: hasPermission('loans', 'create') },
     { href: '/loans', label: t.sidebar.allLoans, icon: List, show: hasPermission('loans', 'read') },
+    { href: '/loans/topup', label: 'Top Up Loan', icon: TrendingUp, show: hasPermission('loans', 'create') },
     { href: '/renewals', label: t.sidebar.renewals, icon: RefreshCw, show: hasPermission('loans', 'update') },
     { href: '/repayments', label: t.sidebar.repayments, icon: Handshake, show: hasPermission('loans', 'update') },
     { href: '/auctions', label: t.sidebar.auctions, icon: Landmark, show: hasPermission('loans', 'update') },

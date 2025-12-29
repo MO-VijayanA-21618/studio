@@ -21,9 +21,11 @@ export function VoucherEntries() {
 
   const loadVouchers = async () => {
     try {
+      console.log('Loading vouchers...');
       const start = new Date(startDate);
       const end = new Date(endDate);
       const data = await getVouchers(start, end);
+      console.log('Vouchers data:', data);
       setVouchers(data);
     } catch (error) {
       console.error('Error loading vouchers:', error);
@@ -74,7 +76,7 @@ export function VoucherEntries() {
                 </TableCell>
                 <TableCell>{voucher.type}</TableCell>
                 <TableCell>{voucher.description}</TableCell>
-                <TableCell className="text-right">₹{voucher.totalAmount.toLocaleString()}</TableCell>
+                <TableCell className="text-right">₹{voucher.entries?.reduce((sum, entry) => sum + entry.debit, 0).toLocaleString() || '0'}</TableCell>
               </TableRow>
             ))}
           </TableBody>

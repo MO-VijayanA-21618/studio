@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { BrainCircuit } from 'lucide-react';
 import { ta } from '@/lib/constants/ta';
+import { useSearchParams } from 'next/navigation';
 
 import type { LoanItem } from '@/lib/types';
 
@@ -21,6 +22,8 @@ interface CalculationStepProps {
 
 export function CalculationStep({ onGeneratePreview }: CalculationStepProps) {
   const { control, watch, setValue } = useFormContext();
+  const searchParams = useSearchParams();
+  const isEditMode = searchParams.get('edit') !== null;
 
   const loanItems = watch('loanItems') as LoanItem[];
   const goldRate = watch('goldRate') as number;
@@ -41,11 +44,11 @@ export function CalculationStep({ onGeneratePreview }: CalculationStepProps) {
   }, [goldRate, netWeight, setValue]);
 
   useEffect(() => {
-    if (estimatedValue && margin) {
+    if (!isEditMode && estimatedValue && margin) {
       const loanAmount = estimatedValue * (margin / 100);
       setValue('loanAmount', loanAmount, { shouldValidate: true });
     }
-  }, [estimatedValue, margin, setValue]);
+  }, [estimatedValue, margin, setValue, isEditMode]);
 
   useEffect(() => {
     if (!margin) {
@@ -120,6 +123,26 @@ export function CalculationStep({ onGeneratePreview }: CalculationStepProps) {
               <FormLabel>Loan Amount</FormLabel>
               <FormControl>
                 <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={control}
+          name="disbursementDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Disbursement Date</FormLabel>
+              <FormControl>
+                <Input 
+                  type="date" 
+                  value={field.value ? new Date(field.value.getTime() - field.value.getTimezoneOffset() * 60000).toISOString().split('T')[0] : new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}
+                  onChange={e => field.onChange(new Date(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

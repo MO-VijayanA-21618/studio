@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './client';
 import { Customer, Loan, LoanItem } from '@/lib/types';
+import { generateCustomerId, generateLoanId } from '@/lib/utils/id-generator';
 
 export const COLLECTIONS = {
   CUSTOMERS: 'customers',
@@ -21,9 +22,13 @@ export const COLLECTIONS = {
   SETTINGS: 'settings'
 };
 
-export const createCustomer = (customer: Omit<Customer, 'id'>) => {
+export const createCustomer = async (customer: Omit<Customer, 'id' | 'customerId'>) => {
   if (!db) throw new Error('Firestore not initialized');
-  return addDoc(collection(db, COLLECTIONS.CUSTOMERS), customer);
+  const customerId = await generateCustomerId();
+  return addDoc(collection(db, COLLECTIONS.CUSTOMERS), {
+    ...customer,
+    customerId
+  });
 };
 
 export const getCustomers = () => {
@@ -36,10 +41,12 @@ export const getCustomer = (id: string) => {
   return getDoc(doc(db, COLLECTIONS.CUSTOMERS, id));
 };
 
-export const createLoan = (loan: Omit<Loan, 'id'>) => {
+export const createLoan = async (loan: Omit<Loan, 'id' | 'loanId'>) => {
   if (!db) throw new Error('Firestore not initialized');
+  const loanId = await generateLoanId();
   return addDoc(collection(db, COLLECTIONS.LOANS), {
     ...loan,
+    loanId,
     loanDate: Timestamp.fromDate(loan.loanDate),
     createdAt: Timestamp.now()
   });

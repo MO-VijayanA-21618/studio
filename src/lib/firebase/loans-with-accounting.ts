@@ -2,22 +2,22 @@ import { collection, addDoc, updateDoc, doc, Timestamp } from 'firebase/firestor
 import { db } from './client';
 import { Loan } from '@/lib/types';
 import { createLoanDisbursementVoucher, createLoanRepaymentVoucher } from '@/lib/accounting/voucher-generator';
-import { generateLoanNumber } from '@/lib/utils/loan-number-generator';
+import { generateLoanId } from '@/lib/utils/id-generator';
 
 // Create loan with accounting entry
 export const createLoanWithAccounting = async (
-  loanData: Omit<Loan, 'id'>,
+  loanData: Omit<Loan, 'id' | 'loanId'>,
   userId: string
 ) => {
   try {
     if (!db) throw new Error('Firestore not initialized');
-    // Generate loan number
-    const loanNumber = await generateLoanNumber();
+    // Generate loan ID
+    const loanId = await generateLoanId();
     
     // Create loan record
     const loanRef = await addDoc(collection(db, 'loans'), {
       ...loanData,
-      loanNumber,
+      loanId,
       loanDate: Timestamp.fromDate(loanData.loanDate),
       createdAt: Timestamp.now(),
     });

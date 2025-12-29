@@ -3,8 +3,6 @@
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { generateLoanReceipt } from '@/lib/utils/receipt-generator';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client';
 
 interface ReceiptGeneratorProps {
   loanData: {
@@ -26,17 +24,9 @@ interface ReceiptGeneratorProps {
 }
 
 export function ReceiptGenerator({ loanData }: ReceiptGeneratorProps) {
-  const handleGenerateReceipt = async () => {
+  const handleGenerateReceipt = () => {
     try {
-      const settingsDoc = await getDoc(doc(db, 'settings', 'global'));
-      const settings = settingsDoc.exists() ? settingsDoc.data() : {};
-      
-      const pdf = generateLoanReceipt({
-        ...loanData,
-        companyAddress: settings.companyAddress,
-        companyPhone: settings.companyPhone,
-        companyEmail: settings.companyEmail,
-      });
+      const pdf = generateLoanReceipt(loanData);
       pdf.save(`Loan_Receipt_${loanData.loanNumber}.pdf`);
     } catch (error) {
       console.error('Error generating receipt:', error);

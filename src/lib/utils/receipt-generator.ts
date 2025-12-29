@@ -16,9 +16,6 @@ interface LoanReceiptData {
   totalWeight: number;
   estimatedValue: number;
   loanDate: Date;
-  companyAddress?: string;
-  companyPhone?: string;
-  companyEmail?: string;
 }
 
 export const generateLoanReceipt = (loanData: LoanReceiptData) => {
@@ -34,27 +31,16 @@ export const generateLoanReceipt = (loanData: LoanReceiptData) => {
   
   // Header
   pdf.setFillColor(primaryColor);
-  pdf.rect(0, 0, pageWidth, 35, 'F');
+  pdf.rect(0, 0, pageWidth, 25, 'F');
   
   pdf.setTextColor('#FFFFFF');
   pdf.setFontSize(20);
   pdf.setFont('helvetica', 'bold');
   pdf.text('NALLANDAVAR PAWN BROKER AND FINANCE', pageWidth / 2, 10, { align: 'center' });
-  
   pdf.setFontSize(10);
-  if (loanData.companyAddress) {
-    pdf.text(loanData.companyAddress, pageWidth / 2, 17, { align: 'center' });
-  }
-  
-  const contactInfo = [];
-  if (loanData.companyPhone) contactInfo.push(`Ph: ${loanData.companyPhone}`);
-  if (loanData.companyEmail) contactInfo.push(`Email: ${loanData.companyEmail}`);
-  contactInfo.push('Licence No: 03/2025-2026');
-  pdf.text(contactInfo.join(' | '), pageWidth / 2, 23, { align: 'center' });
-  
+  pdf.text('Licence No: 03/2025-2026', pageWidth / 2, 17, { align: 'center' });
   pdf.setFontSize(12);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Gold Loan Receipt', pageWidth / 2, 29, { align: 'center' });
+  pdf.text('Gold Loan Receipt', pageWidth / 2, 23, { align: 'center' });
   
   // Reset text color
   pdf.setTextColor(textColor);
@@ -62,27 +48,27 @@ export const generateLoanReceipt = (loanData: LoanReceiptData) => {
   // Receipt details box
   pdf.setDrawColor(primaryColor);
   pdf.setLineWidth(0.5);
-  pdf.rect(10, 45, pageWidth - 20, 25);
+  pdf.rect(10, 35, pageWidth - 20, 25);
   
   // Receipt info
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Receipt No:', 15, 55);
+  pdf.text('Receipt No:', 15, 45);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(loanData.loanNumber, 50, 55);
+  pdf.text(loanData.loanNumber, 50, 45);
   
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Date:', pageWidth - 80, 55);
+  pdf.text('Date:', pageWidth - 80, 45);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(format(loanData.loanDate, 'dd/MM/yyyy'), pageWidth - 50, 55);
+  pdf.text(format(loanData.loanDate, 'dd/MM/yyyy'), pageWidth - 50, 45);
   
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Time:', pageWidth - 80, 65);
+  pdf.text('Time:', pageWidth - 80, 55);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(format(loanData.loanDate, 'HH:mm'), pageWidth - 50, 65);
+  pdf.text(format(loanData.loanDate, 'HH:mm'), pageWidth - 50, 55);
   
   // Customer details
-  let yPos = 85;
+  let yPos = 75;
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(14);
   pdf.text('CUSTOMER DETAILS', 15, yPos);

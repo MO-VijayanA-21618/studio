@@ -1,8 +1,8 @@
 export const en = {
   login: {
     title: 'Login',
-    welcome: 'Welcome to Nalandavar Finance',
-    companyName: 'Nalandavar Finance',
+    welcome: 'Welcome to NALLANDAVAR Finance',
+    companyName: 'NALLANDAVAR Finance',
     emailLabel: 'Email',
     passwordLabel: 'Password',
     loginButton: 'Login',

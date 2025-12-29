@@ -11,8 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Download, Eye } from 'lucide-react';
 import type { LoanItem, Customer } from '@/lib/types';
 import { generateLoanReceipt } from '@/lib/utils/receipt-generator';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client';
+import { generateReceiptNumber, reserveReceiptNumber } from '@/lib/utils/id-generator';
 
 interface LoanPreviewModalProps {
   isOpen: boolean;
@@ -24,22 +23,31 @@ interface LoanPreviewModalProps {
     goldRate: number;
     loanAmount: number;
   };
+  isEditMode?: boolean;
+  existingReceiptNumber?: string;
 }
 
-export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPreviewModalProps) {
+export function LoanPreviewModal({ isOpen, onClose, onConfirm, data, isEditMode = false, existingReceiptNumber }: LoanPreviewModalProps) {
   const [showReceipt, setShowReceipt] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [receiptNumber, setReceiptNumber] = useState<string | null>(existingReceiptNumber || null);
   
   const totalWeight = data.loanItems.reduce((sum, item) => sum + item.weight, 0);
   const estimatedValue = totalWeight * data.goldRate;
   
   const generateReceipt = async () => {
     try {
-      const settingsDoc = await getDoc(doc(db, 'settings', 'global'));
-      const settings = settingsDoc.exists() ? settingsDoc.data() : {};
+      let currentReceiptNumber = receiptNumber;
+      
+      // Generate new receipt number if not exists or in edit mode without existing receipt
+      if (!currentReceiptNumber || (isEditMode && !existingReceiptNumber)) {
+        currentReceiptNumber = await generateReceiptNumber();
+        await reserveReceiptNumber(currentReceiptNumber);
+        setReceiptNumber(currentReceiptNumber);
+      }
       
       const receiptData = {
-        loanNumber: `LN${Date.now().toString().slice(-3)}`,
+        loanNumber: currentReceiptNumber,
         customerName: data.customer.name,
         customerPhone: data.customer.phone,
         customerAddress: data.customer.address,
@@ -48,17 +56,33 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
         goldRate: data.goldRate,
         totalWeight,
         estimatedValue,
-        loanDate: new Date(),
-        companyAddress: settings.companyAddress,
-        companyPhone: settings.companyPhone,
-        companyEmail: settings.companyEmail,
+        loanDate: new Date()
       };
       
       const pdf = generateLoanReceipt(receiptData);
-      pdf.save(`Loan_Receipt_${receiptData.loanNumber}.pdf`);
+      pdf.save(`Loan_Receipt_${currentReceiptNumber}.pdf`);
     } catch (error) {
       console.error('Error generating receipt:', error);
       alert('Failed to generate receipt. Please try again.');
+    }
+  };
+
+  const handleConfirm = async () => {
+    setIsConfirming(true);
+    try {
+      // Generate receipt number if not exists
+      if (!receiptNumber) {
+        const newReceiptNumber = await generateReceiptNumber();
+        await reserveReceiptNumber(newReceiptNumber);
+        setReceiptNumber(newReceiptNumber);
+        // Pass receipt number to parent component
+        (window as any).currentReceiptNumber = newReceiptNumber;
+      } else {
+        (window as any).currentReceiptNumber = receiptNumber;
+      }
+      await onConfirm();
+    } finally {
+      setIsConfirming(false);
     }
   };
 
@@ -86,10 +110,11 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
           <div>
             <h3 className="font-semibold mb-2">Loan Summary</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>Receipt Number: <span className="font-medium">{receiptNumber || 'Will be generated'}</span></div>
               <div>Loan Amount: <span className="font-medium">₹{data.loanAmount.toLocaleString()}</span></div>
               <div>Gold Rate: <span className="font-medium">₹{data.goldRate}/gram</span></div>
               <div>Total Weight: <span className="font-medium">{totalWeight}g</span></div>
-              <div>Estimated Value: <span className="font-medium">₹{estimatedValue.toLocaleString()}</span></div>
+              <div className="col-span-2">Estimated Value: <span className="font-medium">₹{estimatedValue.toLocaleString()}</span></div>
             </div>
           </div>
           
@@ -119,18 +144,11 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data }: LoanPrevi
               Download PDF
             </Button>
             <Button 
-              onClick={async () => {
-                setIsConfirming(true);
-                try {
-                  await onConfirm();
-                } finally {
-                  setIsConfirming(false);
-                }
-              }} 
+              onClick={handleConfirm}
               className="flex-1"
               disabled={isConfirming}
             >
-              {isConfirming ? 'Saving...' : 'Confirm & Save Loan'}
+              {isConfirming ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Confirm & Update Loan' : 'Confirm & Save Loan')}
             </Button>
           </div>
         </div>

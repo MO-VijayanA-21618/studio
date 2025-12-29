@@ -36,7 +36,15 @@ export function CustomerDetailsStep() {
           <FormItem>
             <FormLabel>{ta.common.phone}</FormLabel>
             <FormControl>
-              <Input placeholder="9876543210" {...field} />
+              <Input 
+                placeholder="9876543210" 
+                {...field}
+                maxLength={10}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                  field.onChange(value);
+                }}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

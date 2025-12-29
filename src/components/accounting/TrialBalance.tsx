@@ -18,7 +18,9 @@ export function TrialBalance() {
 
   const loadTrialBalance = async () => {
     try {
+      console.log('Loading trial balance...');
       const data = await getTrialBalance();
+      console.log('Trial balance data:', data);
       setTrialBalance(data);
     } catch (error) {
       console.error('Error loading trial balance:', error);
