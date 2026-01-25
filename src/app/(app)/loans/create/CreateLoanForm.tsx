@@ -31,6 +31,7 @@ const CreateLoanFormSchema = z.object({
   loanAmount: z.union([z.string(), z.number()]).transform(val => typeof val === 'string' ? parseFloat(val) || 0 : val),
   customerPhoto: z.string().nullable().optional(),
   disbursementDate: z.date(),
+  loanNumber: z.string().min(1, "Loan number is required"),
 });
 
 type CreateLoanFormData = z.infer<typeof CreateLoanFormSchema>;
@@ -65,6 +66,7 @@ export function CreateLoanForm() {
       loanAmount: 0,
       customerPhoto: null,
       disbursementDate: new Date(),
+      loanNumber: '',
     },
   });
 
@@ -99,7 +101,8 @@ export function CreateLoanForm() {
           loanAmount: loan.loanAmount,
           margin: 75, // Keep default margin
           customerPhoto: loan.customerPhoto || null,
-          disbursementDate: loan.loanDate?.toDate ? loan.loanDate.toDate() : new Date(loan.loanDate)
+          disbursementDate: loan.loanDate?.toDate ? loan.loanDate.toDate() : new Date(loan.loanDate),
+          loanNumber: loan.loanId || loan.receiptNumber || '',
         });
       }
     } catch (error) {
@@ -136,7 +139,7 @@ export function CreateLoanForm() {
     if (currentStep === 0) isValid = await trigger('customer');
     if (currentStep === 1) isValid = await trigger('loanItems');
     if (currentStep === 2) isValid = true; // Photos are optional
-    if (currentStep === 3) isValid = await trigger(['netWeight', 'goldRate', 'estimatedValue', 'margin', 'loanAmount']);
+    if (currentStep === 3) isValid = await trigger(['netWeight', 'goldRate', 'estimatedValue', 'margin', 'loanAmount', 'loanNumber']);
 
     if (isValid) {
       if (currentStep < steps.length - 1) {
@@ -208,7 +211,8 @@ export function CreateLoanForm() {
           loanDate: data.disbursementDate,
           status: 'Active' as const,
           customerPhoto: data.customerPhoto,
-          receiptNumber: (window as any).currentReceiptNumber
+          loanId: data.loanNumber,
+          receiptNumber: data.loanNumber,
         };
         
         console.log('Creating loan with accounting:', loanData);

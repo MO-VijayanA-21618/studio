@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import {
   FormControl,
@@ -10,9 +10,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { BrainCircuit } from 'lucide-react';
+import { BrainCircuit, RefreshCw } from 'lucide-react';
 import { ta } from '@/lib/constants/ta';
 import { useSearchParams } from 'next/navigation';
+import { generateLoanId } from '@/lib/utils/id-generator';
+import { validateLoanNumber } from '@/lib/utils/loan-validation';
 
 import type { LoanItem } from '@/lib/types';
 
@@ -21,20 +23,54 @@ interface CalculationStepProps {
 }
 
 export function CalculationStep({ onGeneratePreview }: CalculationStepProps) {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch, setValue, setError, clearErrors } = useFormContext();
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get('edit') !== null;
+  const [isValidatingLoanNumber, setIsValidatingLoanNumber] = useState(false);
 
   const loanItems = watch('loanItems') as LoanItem[];
   const goldRate = watch('goldRate') as number;
   const netWeight = watch('netWeight') as number;
   const estimatedValue = watch('estimatedValue') as number;
   const margin = watch('margin') as number;
+  const loanNumber = watch('loanNumber') as string;
 
   useEffect(() => {
     const totalWeight = loanItems.reduce((sum, item) => sum + item.weight, 0);
     setValue('netWeight', totalWeight);
   }, [loanItems, setValue]);
+
+  // Generate loan number on mount if not in edit mode
+  useEffect(() => {
+    if (!isEditMode && !loanNumber) {
+      generateLoanId().then(id => {
+        setValue('loanNumber', id);
+      });
+    }
+  }, [isEditMode, loanNumber, setValue]);
+
+  // Validate loan number when it changes
+  useEffect(() => {
+    if (loanNumber && loanNumber.trim()) {
+      setIsValidatingLoanNumber(true);
+      const timeoutId = setTimeout(async () => {
+        const isValid = await validateLoanNumber(loanNumber, isEditMode ? searchParams.get('edit') || undefined : undefined);
+        if (!isValid) {
+          setError('loanNumber', { message: 'This loan number is already in use' });
+        } else {
+          clearErrors('loanNumber');
+        }
+        setIsValidatingLoanNumber(false);
+      }, 500);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [loanNumber, setError, clearErrors, isEditMode, searchParams]);
+
+  const generateNewLoanNumber = async () => {
+    const newId = await generateLoanId();
+    setValue('loanNumber', newId);
+  };
 
   useEffect(() => {
     if (goldRate && netWeight) {
@@ -131,6 +167,39 @@ export function CalculationStep({ onGeneratePreview }: CalculationStepProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={control}
+          name="loanNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Loan Number</FormLabel>
+              <div className="flex gap-2">
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    placeholder="NL2024001"
+                    className={isValidatingLoanNumber ? 'border-yellow-300' : ''}
+                  />
+                </FormControl>
+                {!isEditMode && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={generateNewLoanNumber}
+                    title="Generate new loan number"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              {isValidatingLoanNumber && (
+                <p className="text-sm text-yellow-600">Validating...</p>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={control}
           name="disbursementDate"
