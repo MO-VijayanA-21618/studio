@@ -66,7 +66,7 @@ export function LoanDetailsModal({ isOpen, onClose, loan }: LoanDetailsModalProp
         txns.push({
           id: 'initial',
           type: 'disbursement',
-          amount: loan.loanAmount,
+          amount: loan.loanAmount - (loan.topUpAmount || 0), // Use original loan amount minus top-ups
           date: loan.loanDate,
           description: 'Initial loan disbursement'
         });

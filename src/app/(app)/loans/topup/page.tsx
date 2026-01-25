@@ -28,7 +28,7 @@ export default function TopUpLoanPage() {
             ...doc.data(),
             loanDate: doc.data().loanDate?.toDate() || new Date()
           }))
-          .filter(loan => loan.status === 'Active') as Loan[];
+          .filter(loan => loan.status === 'Active' || loan.status === 'Renewed') as Loan[];
         
         setLoans(activeLoans);
         setFilteredLoans(activeLoans);
@@ -76,7 +76,7 @@ export default function TopUpLoanPage() {
     <div>
       <div className="mb-8">
         <h1 className="font-headline text-3xl font-bold tracking-tight">Top Up Loan</h1>
-        <p className="text-muted-foreground mt-2">Select an active loan to create a top-up</p>
+        <p className="text-muted-foreground mt-2">Select an active or renewed loan to create a top-up</p>
       </div>
       
       <Card className="mb-6">
@@ -98,13 +98,13 @@ export default function TopUpLoanPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Active Loans ({filteredLoans.length})</CardTitle>
+          <CardTitle>Active & Renewed Loans ({filteredLoans.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <p>Loading active loans...</p>
           ) : filteredLoans.length === 0 ? (
-            <p>No active loans found.</p>
+            <p>No active or renewed loans found.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -126,7 +126,7 @@ export default function TopUpLoanPage() {
                       <td className="p-2">₹{loan.loanAmount.toLocaleString()}</td>
                       <td className="p-2">{loan.loanDate.toLocaleDateString()}</td>
                       <td className="p-2">
-                        <Badge className="bg-green-100 text-green-800">
+                        <Badge className={loan.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
                           {loan.status}
                         </Badge>
                       </td>
