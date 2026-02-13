@@ -177,7 +177,9 @@ export function CreateLoanForm() {
           totalWeight,
           estimatedValue,
           loanAmount: data.loanAmount,
-          customerPhoto: data.customerPhoto
+          customerPhoto: data.customerPhoto,
+          loanId: data.loanNumber,
+          receiptNumber: data.loanNumber
         });
         
         // Update customer details

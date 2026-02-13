@@ -37,10 +37,10 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data, isEditMode 
   
   const generateReceipt = async () => {
     try {
-      let currentReceiptNumber = receiptNumber;
+      let currentReceiptNumber = receiptNumber || data.loanNumber;
       
-      // Generate new receipt number if not exists or in edit mode without existing receipt
-      if (!currentReceiptNumber || (isEditMode && !existingReceiptNumber)) {
+      // Only generate new receipt number if not exists and not in edit mode
+      if (!currentReceiptNumber && !isEditMode) {
         currentReceiptNumber = await generateReceiptNumber();
         await reserveReceiptNumber(currentReceiptNumber);
         setReceiptNumber(currentReceiptNumber);
@@ -70,15 +70,10 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data, isEditMode 
   const handleConfirm = async () => {
     setIsConfirming(true);
     try {
-      // Generate receipt number if not exists
-      if (!receiptNumber) {
-        const newReceiptNumber = await generateReceiptNumber();
-        await reserveReceiptNumber(newReceiptNumber);
-        setReceiptNumber(newReceiptNumber);
-        // Pass receipt number to parent component
-        (window as any).currentReceiptNumber = newReceiptNumber;
-      } else {
-        (window as any).currentReceiptNumber = receiptNumber;
+      // Use loan number from form data
+      const loanNumber = data.loanNumber || receiptNumber;
+      if (loanNumber) {
+        (window as any).currentReceiptNumber = loanNumber;
       }
       await onConfirm();
     } finally {
@@ -110,7 +105,7 @@ export function LoanPreviewModal({ isOpen, onClose, onConfirm, data, isEditMode 
           <div>
             <h3 className="font-semibold mb-2">Loan Summary</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>Receipt Number: <span className="font-medium">{receiptNumber || 'Will be generated'}</span></div>
+              <div>Receipt Number: <span className="font-medium">{data.loanNumber || receiptNumber || 'Will be generated'}</span></div>
               <div>Loan Amount: <span className="font-medium">₹{data.loanAmount.toLocaleString()}</span></div>
               <div>Gold Rate: <span className="font-medium">₹{data.goldRate}/gram</span></div>
               <div>Total Weight: <span className="font-medium">{totalWeight}g</span></div>
