@@ -40,15 +40,6 @@ export function CalculationStep({ onGeneratePreview }: CalculationStepProps) {
     setValue('netWeight', totalWeight);
   }, [loanItems, setValue]);
 
-  // Generate loan number on mount if not in edit mode
-  useEffect(() => {
-    if (!isEditMode && !loanNumber) {
-      generateLoanId().then(id => {
-        setValue('loanNumber', id);
-      });
-    }
-  }, [isEditMode, loanNumber, setValue]);
-
   // Validate loan number when it changes
   useEffect(() => {
     if (loanNumber && loanNumber.trim()) {

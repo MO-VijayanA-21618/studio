@@ -6,18 +6,17 @@ import { generateLoanId } from '@/lib/utils/id-generator';
 
 // Create loan with accounting entry
 export const createLoanWithAccounting = async (
-  loanData: Omit<Loan, 'id'> & { loanId?: string },
+  loanData: Omit<Loan, 'id'> & { loanId: string },
   userId: string
 ) => {
   try {
     if (!db) throw new Error('Firestore not initialized');
-    // Use provided loanId or generate new one
-    const loanId = loanData.loanId || await generateLoanId();
+    if (!loanData.loanId) throw new Error('Loan ID is required');
     
     // Create loan record
     const loanRef = await addDoc(collection(db, 'loans'), {
       ...loanData,
-      loanId,
+      loanId: loanData.loanId,
       loanDate: Timestamp.fromDate(loanData.loanDate),
       createdAt: Timestamp.now(),
     });
