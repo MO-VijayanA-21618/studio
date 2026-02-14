@@ -31,7 +31,8 @@ export default function AllLoansPage() {
         const loansData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          loanDate: doc.data().loanDate?.toDate() || new Date()
+          loanDate: doc.data().loanDate?.toDate() || new Date(),
+          renewalDate: doc.data().renewalDate?.toDate() || null
         })) as Loan[];
         setLoans(loansData);
         setFilteredLoans(loansData);
@@ -147,7 +148,7 @@ export default function AllLoansPage() {
                     <th className="text-left p-2">Loan ID</th>
                     <th className="text-left p-2">Customer</th>
                     <th className="text-left p-2">Amount</th>
-                    <th className="text-left p-2">Date</th>
+                    <th className="text-left p-2">Date (Activation/Renewal)</th>
                     <th className="text-left p-2">Status</th>
                     <th className="text-left p-2">Actions</th>
                   </tr>
@@ -158,7 +159,7 @@ export default function AllLoansPage() {
                       <td className="p-2 font-mono text-xs">{loan.loanId || loan.id?.substring(0, 8) + '...'}</td>
                       <td className="p-2">{loan.customerName}</td>
                       <td className="p-2">₹{loan.loanAmount.toLocaleString()}</td>
-                      <td className="p-2">{loan.loanDate.toLocaleDateString()}</td>
+                      <td className="p-2">{(loan.status === 'Renewed' && loan.renewalDate) ? loan.renewalDate.toLocaleDateString('en-GB') : loan.loanDate.toLocaleDateString('en-GB')}</td>
                       <td className="p-2">
                         <Badge className={getStatusColor(loan.status)}>
                           {loan.status}

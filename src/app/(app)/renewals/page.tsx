@@ -70,13 +70,30 @@ export default function RenewalsPage() {
 
     setLoading(true);
     try {
-      await updateLoanStatus(selectedLoan.id!, 'Renewed');
+      const { updateDoc, doc, Timestamp, arrayUnion } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase/client');
+      
+      const renewalDate = new Date();
+      const renewalHistory = {
+        date: renewalDate,
+        fee: parseFloat(renewalFee),
+        previousStatus: selectedLoan.status
+      };
+      
+      // Update loan with renewal date and history
+      await updateDoc(doc(db, 'loans', selectedLoan.id!), {
+        status: 'Renewed',
+        renewalDate: Timestamp.fromDate(renewalDate),
+        lastRenewalDate: Timestamp.fromDate(renewalDate),
+        renewalHistory: arrayUnion(renewalHistory)
+      });
       
       await createTransaction({
         loanId: selectedLoan.id!,
         type: 'renewal',
         amount: parseFloat(renewalFee),
-        date: new Date()
+        date: renewalDate,
+        description: `Loan renewal fee: ₹${renewalFee}`
       });
 
       toast({

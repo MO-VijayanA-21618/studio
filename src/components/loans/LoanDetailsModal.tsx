@@ -197,6 +197,20 @@ export function LoanDetailsModal({ isOpen, onClose, loan }: LoanDetailsModalProp
                     <span>Loan Date:</span>
                     <span>{loan.loanDate.toLocaleDateString('en-GB')}</span>
                   </div>
+                  {loan.status === 'Renewed' && loan.lastRenewalDate && (
+                    <div className="flex justify-between">
+                      <span>Last Renewal:</span>
+                      <span className="text-blue-600 font-medium">
+                        {loan.lastRenewalDate.toLocaleDateString('en-GB')}
+                      </span>
+                    </div>
+                  )}
+                  {loan.renewalHistory && loan.renewalHistory.length > 0 && (
+                    <div className="flex justify-between">
+                      <span>Total Renewals:</span>
+                      <span className="font-medium">{loan.renewalHistory.length}</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
               
@@ -219,6 +233,35 @@ export function LoanDetailsModal({ isOpen, onClose, loan }: LoanDetailsModalProp
           </TabsContent>
           
           <TabsContent value="transactions" className="space-y-4">
+            {loan.renewalHistory && loan.renewalHistory.length > 0 && (
+              <Card className="mb-4">
+                <CardHeader>
+                  <CardTitle>Renewal History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {loan.renewalHistory.map((renewal: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
+                        <div className="flex items-center gap-3">
+                          <RefreshCw className="h-4 w-4 text-blue-600" />
+                          <div>
+                            <p className="font-medium">Renewal #{index + 1}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {renewal.date?.toDate ? renewal.date.toDate().toLocaleDateString('en-GB') : new Date(renewal.date).toLocaleDateString('en-GB')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-blue-600">₹{renewal.fee.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Renewal Fee</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
             <Card>
               <CardHeader>
                 <CardTitle>Transaction History</CardTitle>
