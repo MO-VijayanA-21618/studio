@@ -118,7 +118,11 @@ export function LoanDetailsModal({ isOpen, onClose, loan }: LoanDetailsModalProp
     
   const totalRepaid = transactions
     .filter(t => t.type === 'repayment')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => {
+      // For backward compatibility: if principalAmount is not set, treat entire amount as principal
+      const principal = t.principalAmount !== undefined ? t.principalAmount : t.amount;
+      return sum + principal;
+    }, 0);
     
   const outstandingAmount = totalDisbursed - totalRepaid;
 

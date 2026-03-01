@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
+import Link from 'next/link';
 import { Download } from 'lucide-react';
 import { generateAccountingGuidePDF } from '@/lib/utils/accounting-guide-pdf';
 
@@ -115,10 +116,17 @@ export default function SettingsPage() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">System Settings</h1>
-        <Button onClick={handleDownloadGuide} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Download Accounting Guide
-        </Button>
+        <div className="flex gap-2">
+          <Link href="/settings/migrate">
+            <Button variant="outline">
+              Migrate Transactions
+            </Button>
+          </Link>
+          <Button onClick={handleDownloadGuide} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Download Accounting Guide
+          </Button>
+        </div>
       </div>
 
       <Card>

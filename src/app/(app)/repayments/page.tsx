@@ -90,7 +90,27 @@ export default function RepaymentsPage() {
     try {
       const amount = parseFloat(repaymentAmount);
       
-      if (amount >= selectedLoan.loanAmount) {
+      // Create transaction with principal and interest breakdown
+      const transactionData: any = {
+        loanId: selectedLoan.id!,
+        type: 'repayment',
+        amount,
+        date: new Date(),
+        description: `${repaymentType === 'interest' ? 'Interest' : 'Principal'} repayment`
+      };
+      
+      // Add principal and interest amounts based on type
+      if (repaymentType === 'principal') {
+        transactionData.principalAmount = amount;
+        transactionData.interestAmount = 0;
+      } else {
+        transactionData.principalAmount = 0;
+        transactionData.interestAmount = amount;
+      }
+      
+      await createTransaction(transactionData);
+      
+      if (amount >= selectedLoan.loanAmount && repaymentType === 'principal') {
         await updateLoanStatus(selectedLoan.id!, 'Closed');
         toast({
           title: "Success",
@@ -99,16 +119,9 @@ export default function RepaymentsPage() {
       } else {
         toast({
           title: "Success",
-          description: "Partial repayment recorded successfully"
+          description: `${repaymentType === 'interest' ? 'Interest' : 'Principal'} repayment recorded successfully`
         });
       }
-      
-      await createTransaction({
-        loanId: selectedLoan.id!,
-        type: 'repayment',
-        amount,
-        date: new Date()
-      });
       
       setSelectedLoan(null);
       setRepaymentAmount('');
