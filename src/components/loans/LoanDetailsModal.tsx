@@ -227,10 +227,6 @@ export function LoanDetailsModal({ isOpen, onClose, loan }: LoanDetailsModalProp
                     <span>Name:</span>
                     <span>{loan.customerName}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Customer ID:</span>
-                    <span className="font-mono text-sm">{loan.customerId}</span>
-                  </div>
                 </CardContent>
               </Card>
             </div>

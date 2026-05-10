@@ -81,6 +81,10 @@ export function CalculationStep({ onGeneratePreview }: CalculationStepProps) {
     if (!margin) {
       setValue('margin', 75);
     }
+    const interestRate = watch('interestRate');
+    if (interestRate === undefined || interestRate === null) {
+      setValue('interestRate', 2);
+    }
   }, []);
 
 
@@ -150,6 +154,19 @@ export function CalculationStep({ onGeneratePreview }: CalculationStepProps) {
               <FormLabel>Loan Amount</FormLabel>
               <FormControl>
                 <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="interestRate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Interest Rate (%)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" {...field} value={field.value ?? 2} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} />
               </FormControl>
               <FormMessage />
             </FormItem>

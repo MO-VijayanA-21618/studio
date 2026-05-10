@@ -54,6 +54,7 @@ export default function AllLoansPage() {
     if (searchTerm) {
       filtered = filtered.filter(loan => 
         loan.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        loan.loanId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         loan.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         loan.customerId.toLowerCase().includes(searchTerm.toLowerCase())
       );
