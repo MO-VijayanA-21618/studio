@@ -20,6 +20,7 @@ export const LoanItemSchema = z.object({
     z.number()
   ]).refine(val => val > 0, "Weight must be positive"),
   purity: z.enum(['24', '22', '18', '14']),
+  pledgeType: z.enum(['gold', 'silver', 'other']).default('gold'),
   photo: z.string().nullable().optional(),
 });
 export type LoanItem = z.infer<typeof LoanItemSchema>;

@@ -66,43 +66,39 @@ export function TopUpForm({ existingLoan, onBack }: TopUpFormProps) {
       
       // Get account IDs by codes
       const accountsSnapshot = await getDocs(collection(db, 'accounts'));
-      console.log('Accounts found:', accountsSnapshot.docs.length);
       const accounts = accountsSnapshot.docs.reduce((acc, doc) => {
-        const data = doc.data();
-        console.log('Account:', data.code, doc.id);
-        acc[data.code] = doc.id;
+        acc[doc.data().code] = doc.id;
         return acc;
       }, {} as Record<string, string>);
       
-      console.log('Account mapping:', accounts);
-      
-      const voucherId = await createVoucherEntry({
-        voucherNumber: `TOPUP-${Date.now()}`,
-        date: Timestamp.fromDate(disbursementDate),
-        type: 'LOAN_DISBURSEMENT',
-        description: `Top-up loan disbursement for ${existingLoan.customerName}`,
-        reference: existingLoan.id || '',
-        entries: [
-          {
-            accountId: accounts['1201'],
-            accountCode: '1201',
-            accountName: 'Loans Receivable',
-            description: `Top-up loan to ${existingLoan.customerName}`,
-            debit: topUpAmount,
-            credit: 0
-          },
-          {
-            accountId: accounts['1001'],
-            accountCode: '1001', 
-            accountName: 'Cash in Hand',
-            description: `Cash disbursed for top-up`,
-            debit: 0,
-            credit: topUpAmount
-          }
-        ]
-      });
-      
-      console.log('Voucher created:', voucherId);
+      // Only create voucher if accounts exist
+      if (accounts['1201'] && accounts['1001']) {
+        await createVoucherEntry({
+          voucherNumber: `TOPUP-${Date.now()}`,
+          date: Timestamp.fromDate(disbursementDate),
+          type: 'LOAN_DISBURSEMENT',
+          description: `Top-up loan disbursement for ${existingLoan.customerName}`,
+          reference: existingLoan.id || '',
+          entries: [
+            {
+              accountId: accounts['1201'],
+              accountCode: '1201',
+              accountName: 'Loans Receivable',
+              description: `Top-up loan to ${existingLoan.customerName}`,
+              debit: topUpAmount,
+              credit: 0
+            },
+            {
+              accountId: accounts['1001'],
+              accountCode: '1001', 
+              accountName: 'Cash in Hand',
+              description: `Cash disbursed for top-up`,
+              debit: 0,
+              credit: topUpAmount
+            }
+          ]
+        });
+      }
 
       // Create transaction record
       await addDoc(collection(db, 'transactions'), {

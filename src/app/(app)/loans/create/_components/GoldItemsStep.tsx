@@ -102,6 +102,28 @@ export function GoldItemsStep() {
             <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <FormField
                 control={control}
+                name={`loanItems.${index}.pledgeType`}
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>வகை (Type)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value || 'gold'}>
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder="வகை" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="gold">தங்கம் (Gold)</SelectItem>
+                            <SelectItem value="silver">வெள்ளி (Silver)</SelectItem>
+                            <SelectItem value="other">மற்றவை (Other)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={control}
                 name={`loanItems.${index}.name`}
                 render={({ field }) => (
                 <FormItem>
@@ -229,7 +251,7 @@ export function GoldItemsStep() {
       <Button
         type="button"
         variant="outline"
-        onClick={() => append({ name: '', weight: 0, purity: '22', photo: null })}
+        onClick={() => append({ name: '', weight: 0, purity: '22', pledgeType: 'gold', photo: null })}
       >
         {ta.createLoan.addGoldItem}
       </Button>

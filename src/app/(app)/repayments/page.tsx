@@ -22,6 +22,7 @@ export default function RepaymentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [repaymentType, setRepaymentType] = useState<'interest' | 'principal'>('interest');
   const [repaymentAmount, setRepaymentAmount] = useState('');
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -95,7 +96,7 @@ export default function RepaymentsPage() {
         loanId: selectedLoan.id!,
         type: 'repayment',
         amount,
-        date: new Date(),
+        date: new Date(paymentDate),
         description: `${repaymentType === 'interest' ? 'Interest' : 'Principal'} repayment`
       };
       
@@ -229,6 +230,15 @@ export default function RepaymentsPage() {
                 placeholder="Enter amount"
                 value={repaymentAmount}
                 onChange={(e) => setRepaymentAmount(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Payment Date</Label>
+              <Input
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
               />
             </div>
             

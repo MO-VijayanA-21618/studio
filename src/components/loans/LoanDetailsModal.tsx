@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loan } from '@/lib/types';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
 import { ArrowUpCircle, ArrowDownCircle, RefreshCw, XCircle, Plus } from 'lucide-react';
 
@@ -34,10 +34,20 @@ interface LoanDetailsModalProps {
 export function LoanDetailsModal({ isOpen, onClose, loan }: LoanDetailsModalProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
+  const [silverRate, setSilverRate] = useState(0);
 
   useEffect(() => {
     if (isOpen && loan?.id) {
       fetchTransactions();
+      // Use silverRate from loan doc, fallback to settings
+      const rate = (loan as any).silverRate;
+      if (rate) {
+        setSilverRate(rate);
+      } else {
+        getDoc(doc(db, 'settings', 'global')).then(snap => {
+          if (snap.exists() && snap.data().defaultSilverRate) setSilverRate(snap.data().defaultSilverRate);
+        });
+      }
     }
   }, [isOpen, loan?.id]);
   
@@ -323,12 +333,22 @@ export function LoanDetailsModal({ isOpen, onClose, loan }: LoanDetailsModalProp
                           <div>
                             <p className="font-medium">{item.name}</p>
                             <p className="text-sm text-muted-foreground">
-                              {item.weight}g • {item.purity}K Gold
+                              {item.weight}g • {(item as any).pledgeType === 'silver' ? 'Silver' : (item as any).pledgeType === 'other' ? 'Other' : `${item.purity}K Gold`}
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">₹{((item.weight * loan.goldRate * (parseInt(item.purity) / 24))).toLocaleString()}</p>
+                          {(() => {
+                            const pledgeType = (item as any).pledgeType || 'gold';
+                            const weight = parseFloat(item.weight as any) || 0;
+                            if (pledgeType === 'silver') {
+                              return silverRate ? <p className="font-medium">₹{Math.round(weight * silverRate).toLocaleString()}</p> : <p className="text-muted-foreground text-sm">-</p>;
+                            } else if (pledgeType === 'other') {
+                              return <p className="text-muted-foreground text-sm">-</p>;
+                            } else {
+                              return <p className="font-medium">₹{Math.round(weight * loan.goldRate * (parseInt(item.purity) / 24)).toLocaleString()}</p>;
+                            }
+                          })()}
                           <p className="text-xs text-muted-foreground">Est. Value</p>
                         </div>
                       </div>

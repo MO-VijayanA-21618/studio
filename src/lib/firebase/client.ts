@@ -19,7 +19,7 @@ let db: Firestore | undefined;
 if (typeof window !== 'undefined') {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   auth = getAuth(app);
-  db = getFirestore(app, 'goldfin');
+  db = getFirestore(app, process.env.NEXT_PUBLIC_FIRESTORE_DATABASE || 'goldfin');
 }
 
 export { app, auth, db };

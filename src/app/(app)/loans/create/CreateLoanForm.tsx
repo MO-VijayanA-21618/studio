@@ -30,6 +30,7 @@ const CreateLoanFormSchema = z.object({
   margin: z.union([z.string(), z.number()]).transform(val => typeof val === 'string' ? parseFloat(val) || 0 : val),
   loanAmount: z.union([z.string(), z.number()]).transform(val => typeof val === 'string' ? parseFloat(val) || 0 : val),
   interestRate: z.union([z.string(), z.number()]).transform(val => typeof val === 'string' ? parseFloat(val) || 0 : val),
+  silverRate: z.union([z.string(), z.number()]).transform(val => typeof val === 'string' ? parseFloat(val) || 0 : val).optional(),
   customerPhoto: z.string().nullable().optional(),
   disbursementDate: z.date(),
   loanNumber: z.string().min(1, "Loan number is required"),
@@ -59,13 +60,14 @@ export function CreateLoanForm() {
     mode: 'onChange',
     defaultValues: {
       customer: { name: '', phone: '', address: '' },
-      loanItems: [{ name: '', weight: 0, purity: '22', photo: null }],
+      loanItems: [{ name: '', weight: 0, purity: '22', pledgeType: 'gold', photo: null }],
       netWeight: 0,
       goldRate: '',
       estimatedValue: 0,
       margin: 75,
       loanAmount: 0,
       interestRate: 2,
+      silverRate: 0,
       customerPhoto: null,
       disbursementDate: new Date(),
       loanNumber: '',
@@ -103,6 +105,7 @@ export function CreateLoanForm() {
           loanAmount: loan.loanAmount,
           margin: 75,
           interestRate: loan.interestRate ?? 2,
+          silverRate: (loan as any).silverRate ?? 0,
           customerPhoto: loan.customerPhoto || null,
           disbursementDate: loan.loanDate?.toDate ? loan.loanDate.toDate() : new Date(loan.loanDate),
           loanNumber: loan.loanId || loan.receiptNumber || '',
@@ -128,6 +131,9 @@ export function CreateLoanForm() {
         }
         if (settings.ltvRatio) {
           methods.setValue('margin', settings.ltvRatio);
+        }
+        if (settings.defaultSilverRate) {
+          methods.setValue('silverRate', settings.defaultSilverRate);
         }
       }
     } catch (error) {
@@ -181,6 +187,7 @@ export function CreateLoanForm() {
           estimatedValue,
           loanAmount: data.loanAmount,
           interestRate: data.interestRate,
+          silverRate: data.silverRate || 0,
           customerPhoto: data.customerPhoto,
           loanId: data.loanNumber,
           receiptNumber: data.loanNumber
@@ -215,6 +222,7 @@ export function CreateLoanForm() {
           estimatedValue,
           loanAmount: data.loanAmount,
           interestRate: data.interestRate,
+          silverRate: data.silverRate || 0,
           loanDate: data.disbursementDate,
           status: 'Active' as const,
           customerPhoto: data.customerPhoto,

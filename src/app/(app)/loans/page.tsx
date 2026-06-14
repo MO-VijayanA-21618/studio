@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ta } from "@/lib/constants/ta";
 import { getLoans } from '@/lib/firebase/firestore';
 import { Loan } from '@/lib/types';
-import { PlusCircle, Eye, Search, TrendingUp, Edit } from 'lucide-react';
+import { PlusCircle, Eye, Search, TrendingUp, Edit, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import Link from 'next/link';
 import { LoanDetailsModal } from '@/components/loans/LoanDetailsModal';
 
@@ -21,6 +21,8 @@ export default function AllLoansPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sortField, setSortField] = useState<'loanDate' | 'customerName' | 'loanAmount' | 'loanId'>('loanId');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -49,8 +51,6 @@ export default function AllLoansPage() {
   // Filter loans based on search and status
   useEffect(() => {
     let filtered = loans;
-    
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(loan => 
         loan.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -59,14 +59,31 @@ export default function AllLoansPage() {
         loan.customerId.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
-    // Filter by status
     if (statusFilter !== 'all') {
       filtered = filtered.filter(loan => loan.status === statusFilter);
     }
-    
+    filtered = [...filtered].sort((a, b) => {
+      let aVal: any, bVal: any;
+      if (sortField === 'loanDate') { aVal = a.loanDate?.getTime(); bVal = b.loanDate?.getTime(); }
+      else if (sortField === 'loanAmount') { aVal = a.loanAmount; bVal = b.loanAmount; }
+      else if (sortField === 'customerName') { aVal = a.customerName; bVal = b.customerName; }
+      else if (sortField === 'loanId') { aVal = parseInt(a.loanId || a.id || '0'); bVal = parseInt(b.loanId || b.id || '0'); }
+      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
     setFilteredLoans(filtered);
-  }, [loans, searchTerm, statusFilter]);
+  }, [loans, searchTerm, statusFilter, sortField, sortDir]);
+
+  const toggleSort = (field: typeof sortField) => {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortField(field); setSortDir('asc'); }
+  };
+
+  const SortIcon = ({ field }: { field: typeof sortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="inline h-3 w-3 ml-1 text-muted-foreground" />;
+    return sortDir === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-1" /> : <ArrowDown className="inline h-3 w-3 ml-1" />;
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -146,10 +163,10 @@ export default function AllLoansPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left p-2">Loan ID</th>
-                    <th className="text-left p-2">Customer</th>
-                    <th className="text-left p-2">Amount</th>
-                    <th className="text-left p-2">Date (Activation/Renewal)</th>
+                    <th className="text-left p-2 cursor-pointer hover:text-primary" onClick={() => toggleSort('loanId')}>Loan ID <SortIcon field="loanId" /></th>
+                    <th className="text-left p-2 cursor-pointer hover:text-primary" onClick={() => toggleSort('customerName')}>Customer <SortIcon field="customerName" /></th>
+                    <th className="text-left p-2 cursor-pointer hover:text-primary" onClick={() => toggleSort('loanAmount')}>Amount <SortIcon field="loanAmount" /></th>
+                    <th className="text-left p-2 cursor-pointer hover:text-primary" onClick={() => toggleSort('loanDate')}>Date <SortIcon field="loanDate" /></th>
                     <th className="text-left p-2">Status</th>
                     <th className="text-left p-2">Actions</th>
                   </tr>

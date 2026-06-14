@@ -15,6 +15,8 @@ import { generateAccountingGuidePDF } from '@/lib/utils/accounting-guide-pdf';
 interface Settings {
   defaultGoldRate: number;
   minGoldRate: number;
+  defaultSilverRate: number;
+  minSilverRate: number;
   roi: number;
   minTenure: number;
   carryForwardInt: number;
@@ -39,6 +41,8 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings>({
     defaultGoldRate: 0,
     minGoldRate: 0,
+    defaultSilverRate: 0,
+    minSilverRate: 0,
     roi: 0,
     minTenure: 0,
     carryForwardInt: 0,
@@ -153,6 +157,26 @@ export default function SettingsPage() {
                 type="number"
                 value={settings.minGoldRate}
                 onChange={(e) => setSettings({ ...settings, minGoldRate: Number(e.target.value) })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="defaultSilverRate">Default Silver Rate (₹/gram)</Label>
+              <Input
+                id="defaultSilverRate"
+                type="number"
+                value={settings.defaultSilverRate || 0}
+                onChange={(e) => setSettings({ ...settings, defaultSilverRate: Number(e.target.value) })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="minSilverRate">Min Silver Rate (₹/gram)</Label>
+              <Input
+                id="minSilverRate"
+                type="number"
+                value={settings.minSilverRate || 0}
+                onChange={(e) => setSettings({ ...settings, minSilverRate: Number(e.target.value) })}
               />
             </div>
 
