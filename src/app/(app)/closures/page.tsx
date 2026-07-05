@@ -19,6 +19,7 @@ export default function ClosuresPage() {
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [closureAmount, setClosureAmount] = useState('');
+  const [closureDate, setClosureDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -82,7 +83,7 @@ export default function ClosuresPage() {
         loanId: selectedLoan.id!,
         type: 'closure',
         amount: parseFloat(closureAmount),
-        date: new Date()
+        date: new Date(closureDate)
       });
 
       toast({
@@ -182,6 +183,15 @@ export default function ClosuresPage() {
                 placeholder="Enter final amount"
                 value={closureAmount}
                 onChange={(e) => setClosureAmount(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Closure Date</Label>
+              <Input
+                type="date"
+                value={closureDate}
+                onChange={(e) => setClosureDate(e.target.value)}
               />
             </div>
             

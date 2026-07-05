@@ -211,6 +211,15 @@ export function LoanDetailsModal({ isOpen, onClose, loan }: LoanDetailsModalProp
                     <span>Loan Date:</span>
                     <span>{loan.loanDate.toLocaleDateString('en-GB')}</span>
                   </div>
+                  {loan.status === 'Closed' && (() => {
+                    const closureTxn = transactions.find(t => t.type === 'closure');
+                    return closureTxn ? (
+                      <div className="flex justify-between">
+                        <span>Closure Date:</span>
+                        <span className="text-gray-600 font-medium">{closureTxn.date.toLocaleDateString('en-GB')}</span>
+                      </div>
+                    ) : null;
+                  })()}
                   {loan.status === 'Renewed' && loan.lastRenewalDate && (
                     <div className="flex justify-between">
                       <span>Last Renewal:</span>
